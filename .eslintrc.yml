@@ -1,0 +1,104 @@
+extends:
+  - airbnb
+  - plugin:jest/recommended
+parser: "babel-eslint"
+rules:
+
+  semi:
+    - error
+    - never
+  noeqeq: off
+  eqeqeq: off
+  no-throw-literal: off
+  comma-dangle: off
+  react/jsx-uses-vars: error
+  react/jsx-uses-react: error
+
+  # we don't want these but have them due to legacy conventions
+  react/jsx-one-expression-per-line: off
+  react/destructuring-assignment: off
+  jest/valid-expect: off # ditto
+  react/jsx-filename-extension: off # maybe good to fix
+  no-use-before-define: off # fix
+  import/extensions: off # fix
+  no-shadow: off  # really??
+  guard-for-in: off  # fix maybe
+  brace-style: off # fix but annoying
+  no-alert: off # fix
+  react/forbid-prop-types: off # fix
+  curly: off # no rules ever seem to be sane
+  react/no-typos: off # https://github.com/yannickcr/eslint-plugin-react/issues/1389
+  react/prefer-stateless-function:
+    - 2
+    - ignorePureComponents: true
+  jsx-a11y/alt-text: off
+  jsx-a11y/click-events-have-key-events: off
+  jsx-a11y/label-has-for: off
+  jsx-a11y/interactive-supports-focus: off
+  no-console:
+    - error
+    - allow:  # no console.log
+      - trace
+      - debug
+      - info
+      - warn
+      - error
+  jsx-a11y/no-static-element-interactions: off
+  react/sort-comp: off
+  react/require-default-props: off
+  space-before-function-paren: off
+  no-confusing-arrow: off
+  arrow-parens: off
+  import/no-named-as-default: off
+  import/no-named-as-default-member: off # fix, decorator syntax
+  no-continue: off
+  no-restricted-syntax: off
+  default-case: off
+  no-restricted-properties: off
+  global-require: off
+  no-unused-vars: off
+  no-multi-assign: off
+  class-methods-use-this: off
+  prefer-destructuring: off
+  import/prefer-default-export: off
+  func-names: off
+  consistent-return: off
+  no-param-reassign: off
+  no-underscore-dangle: off
+  prefer-const: off
+  one-var: off
+  prefer-spread: off
+  no-plusplus: off
+  no-useless-escape: off
+  camelcase: off
+  no-restricted-globals: off
+  max-len: off  # whatever
+  no-prototype-builtins: off
+  no-mixed-operators: off
+  import/first: off
+  no-nested-ternary: off  # andrii!!
+  vars-on-top: off # w/e
+  no-var: off # good luck
+  radix: off
+  jsx-a11y/anchor-is-valid: off
+  jsx-a11y/accessible-emoji: off
+  jsx-a11y/media-has-caption: off
+  no-debugger: off
+  jest/no-disabled-tests: off
+
+globals:
+  angular: false
+  Sugar: false
+  chrome: false
+  Gmail: false
+  APPNAME: false
+
+env:
+  jquery: true
+  browser: true
+  mocha: true
+
+plugins:
+  - react
+  - babel
+  - jest
