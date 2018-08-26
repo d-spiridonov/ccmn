@@ -13,16 +13,18 @@ const username_presence = 'RO'
 const password_presence = 'Passw0rd'
 const aesUId = ''
 
-const apiClientCMX = axios.create()
-apiClientCMX.defaults.baseURL = url_cmx
-apiClientCMX.defaults.headers.common['Authorization'] = `Basic ${btoa(`${username_cmx}:${password_cmx}`)}` // eslint-disable-line dot-notation
-apiClientCMX.defaults.json = true
+// different instances of apiClients
+const apiClientCMX = axios.create({
+  baseURL: url_cmx,
+  headers: { Authorization: `Basic ${btoa(`${username_cmx}:${password_cmx}`)}` },
+  json: true
+})
 
-
-// const apiClientPresence = axios.create()
-// apiClientPresence.defaults.baseURL = 'https://cisco-presence.unit.ua'
-// apiClientPresence.defaults.headers.common['Authorization'] = `Basic ${btoa(`${username_presence}:${password_presence}`)}` // eslint-disable-line dot-notation
-// apiClientCMX.defaults.json = true
+const apiClientPresence = axios.create({
+  baseURL: url_presence,
+  headers: { Authorization: `Basic ${btoa(`${username_presence}:${password_presence}`)}` },
+  json: true
+})
 
 export const ciscoInitialState = {
   onlineUsers: 0,
@@ -37,32 +39,35 @@ export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/locat
 
 // this function should be invoked in header
 export const getAesUId = () => dispatch => new Promise((resolve, reject) => {
-  apiClientPresence('/api/config/v1/sites')
+  apiClientPresence.get('/api/config/v1/sites')
     .then(res => {
-      if (res.data.aesUId) dispatch(saveAesUId(res.data.aesUId))
-      resolve(res)
+      if (res.data[0].aesUId) dispatch(saveAesUId(res.data[0].aesUId))
+      resolve()
     }).catch((err) => {
       console.warn(err)
       reject(err)
     })
 })
 
-const requestCountOfVisitorsToday = () => (dispatch, getState) => apiClientPresence('/api/presence/v1/connected/count/today', {
-  params: {
-    siteId: getState().aesUId
-  }
-})
-  .then(res => {
-    if (res.data) dispatch(saveTotalVisitorsToday(res.data))
-  }).catch((err) => { console.warn(err) })
+const requestCountOfVisitorsToday = () => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  apiClientPresence('/api/presence/v1/connected/count/today', {
+    params: {
+      siteId: aesUId
+    }
+  })
+    .then(res => {
+      if (res.data) dispatch(saveTotalVisitorsToday(res.data))
+    }).catch((err) => { console.warn(err) })
+}
 
 export const getCountOfVisitorsToday = () => (dispatch, getState) => {
-  if (!getState.aesUId) {
-    getAesUId().then(() => {
-      requestCountOfVisitorsToday()
+  if (!getState.ciscoaesUId) {
+    dispatch(getAesUId()).then(() => {
+      dispatch(requestCountOfVisitorsToday())
     })
   } else {
-    requestCountOfVisitorsToday()
+    dispatch(requestCountOfVisitorsToday())
   }
 }
 

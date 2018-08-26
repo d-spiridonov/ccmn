@@ -28,7 +28,7 @@ class NavToolBar extends React.Component {
     getNumberOfOnlineUsers: PropTypes.func.isRequired,
     onlineUsers: PropTypes.number.isRequired,
     visitorsToday: PropTypes.number.isRequired,
-    // getCountOfVisitorsToday: PropTypes.func.isRequired,
+    getCountOfVisitorsToday: PropTypes.func.isRequired,
   }
 
   toggle = () => {
@@ -48,7 +48,7 @@ class NavToolBar extends React.Component {
   }
 
   componentDidMount() {
-    // this.props.getCountOfVisitorsToday()
+    this.props.getCountOfVisitorsToday()
     this.interval = setInterval(this.setDateAndTime, 1000)
     this.devicesConnectedTimeout = setInterval(this.getTotalDevicesConnected, 15000)
   }
@@ -71,8 +71,7 @@ class NavToolBar extends React.Component {
             <div style={styles.headerItem}><b>CCMN</b></div>
             <div style={styles.headerItem}>{dateAndTime}</div>
             <div style={styles.headerItem}>Total Devices Connected: {onlineUsers}</div>
-            <div style={styles.headerItem}>Connected today: {visitorsToday}</div>
-            <div style={styles.headerItem}>New connections:</div>
+            <div style={styles.headerItem}>Visitors Today: {visitorsToday}</div>
           </div>
 
         </Header>
