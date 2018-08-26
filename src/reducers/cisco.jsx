@@ -75,10 +75,10 @@ export const getCountOfVisitorsToday = () => (dispatch, getState) => {
 
 const getNestedObject = (nestedObj, pathArr) => pathArr.reduce((obj, key) => (obj && obj[key] !== 'undefined') ? obj[key] : undefined, nestedObj)
 
-const requestMaps = imageNames => dispatch => {
-  let images = []
-  imageNames.forEach(image => {
-    apiClientCMX.get(`/api/config/v1/maps/imagesource/${image}`,
+const requestMaps = images => dispatch => {
+  let imageSrcs = []
+  images.forEach(image => {
+    apiClientCMX.get(`/api/config/v1/maps/imagesource/${image.imageName}`,
       { responseType: 'arraybuffer' })
       .then(response => {
         const base64 = btoa(
@@ -87,10 +87,10 @@ const requestMaps = imageNames => dispatch => {
             '',
           ),
         )
-        images.push(`data:;base64,${base64}`)
+        imageSrcs.push({ src: `data:;base64,${base64}`, id: image.id })
       })
   })
-  dispatch(saveFloorImage(images))
+  dispatch(saveFloorImage(imageSrcs))
 }
 
 export const getAllMaps = () => dispatch => apiClientCMX.get(
@@ -98,7 +98,7 @@ export const getAllMaps = () => dispatch => apiClientCMX.get(
 )
   .then(response => {
     const floorList = getNestedObject(response.data, ['campuses', 2, 'buildingList', 0, 'floorList'])
-    const images = floorList.filter(floor => floor.image && floor.image.imageName).map(floor => floor.image.imageName)
+    const images = floorList.filter(floor => floor.image && floor.image.imageName).map(floor => floor.image)
     dispatch(requestMaps(images))
   })
 
