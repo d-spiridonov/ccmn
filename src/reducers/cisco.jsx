@@ -4,6 +4,7 @@ import axios from 'axios'
 export const saveOnlineUsers = createAction('save online users')
 export const saveAesUId = createAction('save aesUId')
 export const saveTotalVisitorsToday = createAction('save total visitors today')
+export const saveFloorImage = createAction('save floor image')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -30,6 +31,7 @@ export const ciscoInitialState = {
   onlineUsers: 0,
   aesUId: null,
   visitorsToday: 0,
+  floorImage: null,
 }
 
 export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/location/v2/clients/count/')
@@ -41,7 +43,7 @@ export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/locat
 export const getAesUId = () => dispatch => new Promise((resolve, reject) => {
   apiClientPresence.get('/api/config/v1/sites')
     .then(res => {
-      if (res.data[0].aesUId) dispatch(saveAesUId(res.data[0].aesUId))
+      if (res.data[0]) dispatch(saveAesUId(res.data[0].aesUId))
       resolve()
     }).catch((err) => {
       console.warn(err)
@@ -71,6 +73,35 @@ export const getCountOfVisitorsToday = () => (dispatch, getState) => {
   }
 }
 
+const getNestedObject = (nestedObj, pathArr) => pathArr.reduce((obj, key) => (obj && obj[key] !== 'undefined') ? obj[key] : undefined, nestedObj)
+
+const requestMaps = imageNames => dispatch => {
+  let images = []
+  imageNames.forEach(image => {
+    apiClientCMX.get(`/api/config/v1/maps/imagesource/${image}`,
+      { responseType: 'arraybuffer' })
+      .then(response => {
+        const base64 = btoa(
+          new Uint8Array(response.data).reduce(
+            (data, byte) => data + String.fromCharCode(byte),
+            '',
+          ),
+        )
+        images.push(`data:;base64,${base64}`)
+      })
+  })
+  dispatch(saveFloorImage(images))
+}
+
+export const getAllMaps = () => dispatch => apiClientCMX.get(
+  '/api/config/v1/maps',
+)
+  .then(response => {
+    const floorList = getNestedObject(response.data, ['campuses', 2, 'buildingList', 0, 'floorList'])
+    const images = floorList.filter(floor => floor.image && floor.image.imageName).map(floor => floor.image.imageName)
+    dispatch(requestMaps(images))
+  })
+
 export default createReducer(
   {
     [saveOnlineUsers]: (state, onlineUsers) => ({
@@ -84,6 +115,10 @@ export default createReducer(
     [saveTotalVisitorsToday]: (state, visitorsToday) => ({
       ...state,
       visitorsToday
+    }),
+    [saveFloorImage]: (state, floorImage) => ({
+      ...state,
+      floorImage
     })
   },
   ciscoInitialState

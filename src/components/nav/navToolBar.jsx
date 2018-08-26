@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import {
-  Layout, Menu, Breadcrumb, Icon
+  Layout, Menu, Breadcrumb, Icon, Das
 } from 'antd'
 import { connect } from 'react-redux'
 import { dispatch } from 'redux-act'
@@ -87,10 +87,10 @@ class NavToolBar extends React.Component {
               theme="dark"
               defaultSelectedKeys={['1']}
             >
-              <Menu.Item key="1">option1</Menu.Item>
-              <Menu.Item key="2">option2</Menu.Item>
-              <Menu.Item key="3">option3</Menu.Item>
-              <Menu.Item key="4">option4</Menu.Item>
+              <Menu.Item key="1"><Icon type="dashboard" />Dashboard</Menu.Item>
+              <Menu.Item key="2"><Icon type="pie-chart" />Metrics</Menu.Item>
+              <Menu.Item key="3"><Icon type="compass" />Maps</Menu.Item>
+              <Menu.Item key="4"><Icon type="area-chart" />Analytics</Menu.Item>
             </Menu>
           </Sider>
           <Layout>

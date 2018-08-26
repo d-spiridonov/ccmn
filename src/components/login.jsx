@@ -72,7 +72,7 @@ class Login extends React.Component {
   }
 
   goToDashboard = () => {
-    this.props.push({ pathname: '/dashboard/map' })
+    this.props.push({ pathname: '/dashboard/dashboard' })
   }
 
   render() {

@@ -14,6 +14,7 @@ import 'antd/dist/antd.css'
 import { logout } from '../../reducers/auth'
 import Logout from './logout'
 import Nav from '../../components/nav/navToolBar'
+import FloorMap from '../../components/maps/map'
 
 const App = () => (
   <PersistGate loading={null} persistor={persistor}>
@@ -22,7 +23,8 @@ const App = () => (
       <Route exact path="/about-us" component={About} />
       <Route exact path="/sign-up" component={SignUp} />
       <Nav>
-        <Route exact path="/dashboard/map" component={Dashboard} />
+        <Route exact path="/dashboard/dashboard" component={Dashboard} />
+        <Route exact path="/dashboard/map" component={FloorMap} />
       </Nav>
     </Switch>
   </PersistGate>
