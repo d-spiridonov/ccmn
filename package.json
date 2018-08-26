@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development --open --hot",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "lint": "eslint src --ext: eslint design --ext js,jsx",
+    "prepush": "eslint src --ext: eslint design --ext js,jsx"
   },
   "repository": {
     "type": "git",

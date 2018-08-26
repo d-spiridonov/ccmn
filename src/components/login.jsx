@@ -68,7 +68,6 @@ class Login extends React.Component {
         username: this.state.username,
         password: this.state.password,
       })
-      .then(res => console.log(res))
   }
 
   goToDashboard = () => {

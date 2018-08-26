@@ -7,12 +7,11 @@ import ReactRouterPropTypes from 'react-router-prop-types'
 const AuthenticatedRoute = ({ component: Component, isLoggedIn, ...rest }) => (
   <Route
     {...rest}
-    render={props =>
-      isLoggedIn ? (
-        <Component {...props} />
-      ) : (
-        <Redirect to={{ pathname: '/', state: { from: props.location } }} />
-      )
+    render={props => isLoggedIn ? (
+      <Component {...props} />
+    ) : (
+      <Redirect to={{ pathname: '/', state: { from: props.location } }} />
+    )
     }
   />
 )
