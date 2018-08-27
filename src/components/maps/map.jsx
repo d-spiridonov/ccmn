@@ -11,7 +11,7 @@ class FloorMap extends Component {
   static propTypes = {
     getAllMaps: PropTypes.func.isRequired,
     floorMaps: PropTypes.array.isRequired,
-    activeClients: PropTypes.array.isRequired,
+    activeMacAddresses: PropTypes.array.isRequired,
     getAllClients: PropTypes.func.isRequired,
   }
 
@@ -19,9 +19,18 @@ class FloorMap extends Component {
     currentFloor: 1
   }
 
+  requestNewClients = () => {
+    this.props.getAllClients()
+  }
+
   componentDidMount() {
     if (!this.props.floorMaps) this.props.getAllMaps()
-    if (!this.props.activeClients) this.props.getAllClients()
+    this.requestNewClients()
+    this.requestNewClientsInterval = setInterval(this.requestNewClients, 30000)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.requestNewClientsInterval)
   }
 
   handleFloorChange = e => {
@@ -65,7 +74,7 @@ class FloorMap extends Component {
 
 const mapStateToProps = state => ({
   floorMaps: state.cisco.floorImages,
-  activeClients: state.cisco.activeClients,
+  activeMacAddresses: state.cisco.activeClients,
 })
 
 const mapDispatchToProps = dispatch => ({

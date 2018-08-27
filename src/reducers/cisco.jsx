@@ -6,6 +6,7 @@ export const saveAesUId = createAction('save aesUId')
 export const saveTotalVisitorsToday = createAction('save total visitors today')
 export const saveFloorImages = createAction('save floor image')
 export const saveActiveClients = createAction('save active clients')
+export const saveActiveMacAddresses = createAction('save active mac addresses')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -108,6 +109,8 @@ export const getAllMaps = () => dispatch => apiClientCMX.get(
 export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v2/clients/')
   .then(response => {
     dispatch(saveActiveClients(response.data))
+    const activeMacAddresses = response.data.map(macAddress => macAddress.macAddress)
+    dispatch(saveActiveMacAddresses(activeMacAddresses))
   })
 
 export default createReducer(
@@ -131,6 +134,10 @@ export default createReducer(
     [saveActiveClients]: (state, activeClients) => ({
       ...state,
       activeClients
+    }),
+    [saveActiveMacAddresses]: (state, activeMacAddresses) => ({
+      ...state,
+      activeMacAddresses,
     })
   },
   ciscoInitialState
