@@ -37,12 +37,12 @@ class FloorMap extends Component {
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <Search
             placeholder="Enter MAC address"
-            onSearch={value => console.log(value)}
+            // onSearch={value => console.log(value)}
             style={{ width: 200 }}
           />
           <Search
             placeholder="Enter x-login"
-            onSearch={value => console.log(value)}
+            // onSearch={value => console.log(value)}
             style={{ width: 200 }}
           />
         </div>

@@ -6,6 +6,7 @@ import {
 import { connect } from 'react-redux'
 import { dispatch } from 'redux-act'
 import moment from 'moment'
+import { push } from 'react-router-redux'
 import {
   getNumberOfOnlineUsers,
   getCountOfVisitorsToday
@@ -29,6 +30,7 @@ class NavToolBar extends React.Component {
     onlineUsers: PropTypes.number.isRequired,
     visitorsToday: PropTypes.number.isRequired,
     getCountOfVisitorsToday: PropTypes.func.isRequired,
+    push: PropTypes.func.isRequired,
   }
 
   toggle = () => {
@@ -58,6 +60,18 @@ class NavToolBar extends React.Component {
     clearInterval(this.devicesConnectedTimeout)
   }
 
+  goToMap = () => {
+    this.props.push('/dashboard/map')
+  }
+
+  goToDashboard = () => {
+    this.props.push('/dashboard/dashboard')
+  }
+
+  handleSelect = (event) => {
+    this.props.push(`/dashboard/${event.key}`)
+  }
+
   render() {
     const { children, onlineUsers, visitorsToday } = this.props
     const { dateAndTime } = this.state
@@ -85,11 +99,12 @@ class NavToolBar extends React.Component {
             <Menu
               mode="inline"
               theme="dark"
-              defaultSelectedKeys={['1']}
+              defaultSelectedKeys={['dashboard']}
+              onSelect={this.handleSelect}
             >
-              <Menu.Item key="1"><Icon type="dashboard" />Dashboard</Menu.Item>
+              <Menu.Item key="dashboard"><Icon type="dashboard" />Dashboard</Menu.Item>
               <Menu.Item key="2"><Icon type="pie-chart" />Metrics</Menu.Item>
-              <Menu.Item key="3"><Icon type="compass" />Maps</Menu.Item>
+              <Menu.Item key="map"><Icon type="compass" />Maps</Menu.Item>
               <Menu.Item key="4"><Icon type="area-chart" />Analytics</Menu.Item>
             </Menu>
           </Sider>
@@ -114,7 +129,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   getNumberOfOnlineUsers: () => dispatch(getNumberOfOnlineUsers()),
-  getCountOfVisitorsToday: () => dispatch(getCountOfVisitorsToday())
+  getCountOfVisitorsToday: () => dispatch(getCountOfVisitorsToday()),
+  push: path => dispatch(push(path)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavToolBar)
