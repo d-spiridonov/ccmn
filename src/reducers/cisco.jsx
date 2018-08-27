@@ -4,7 +4,8 @@ import axios from 'axios'
 export const saveOnlineUsers = createAction('save online users')
 export const saveAesUId = createAction('save aesUId')
 export const saveTotalVisitorsToday = createAction('save total visitors today')
-export const saveFloorImage = createAction('save floor image')
+export const saveFloorImages = createAction('save floor image')
+export const saveActiveClients = createAction('save active clients')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -32,6 +33,7 @@ export const ciscoInitialState = {
   aesUId: null,
   visitorsToday: 0,
   floorImage: null,
+  saveActiveClients: [],
 }
 
 export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/location/v2/clients/count/')
@@ -73,12 +75,13 @@ export const getCountOfVisitorsToday = () => (dispatch, getState) => {
   }
 }
 
+// pass an object and an path array to look for the particular key
 const getNestedObject = (nestedObj, pathArr) => pathArr.reduce((obj, key) => (obj && obj[key] !== 'undefined') ? obj[key] : undefined, nestedObj)
 
-const requestMaps = images => dispatch => {
+const requestMaps = floorList => dispatch => {
   let imageSrcs = []
-  images.forEach(image => {
-    apiClientCMX.get(`/api/config/v1/maps/imagesource/${image.imageName}`,
+  floorList.forEach(floor => {
+    apiClientCMX.get(`/api/config/v1/maps/imagesource/${floor.image.imageName}`,
       { responseType: 'arraybuffer' })
       .then(response => {
         const base64 = btoa(
@@ -87,10 +90,10 @@ const requestMaps = images => dispatch => {
             '',
           ),
         )
-        imageSrcs.push({ src: `data:;base64,${base64}`, id: image.id })
+        imageSrcs.push({ src: `data:;base64,${base64}`, floor: floor.floorNumber })
       })
   })
-  dispatch(saveFloorImage(imageSrcs))
+  dispatch(saveFloorImages(imageSrcs))
 }
 
 export const getAllMaps = () => dispatch => apiClientCMX.get(
@@ -98,8 +101,13 @@ export const getAllMaps = () => dispatch => apiClientCMX.get(
 )
   .then(response => {
     const floorList = getNestedObject(response.data, ['campuses', 2, 'buildingList', 0, 'floorList'])
-    const images = floorList.filter(floor => floor.image && floor.image.imageName).map(floor => floor.image)
-    dispatch(requestMaps(images))
+    const filteredFloorList = floorList.filter(floor => floor.image && floor.image.imageName)
+    dispatch(requestMaps(filteredFloorList))
+  })
+
+export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v2/clients/')
+  .then(response => {
+    dispatch(saveActiveClients(response.data))
   })
 
 export default createReducer(
@@ -116,9 +124,13 @@ export default createReducer(
       ...state,
       visitorsToday
     }),
-    [saveFloorImage]: (state, floorImage) => ({
+    [saveFloorImages]: (state, floorImages) => ({
       ...state,
-      floorImage
+      floorImages
+    }),
+    [saveActiveClients]: (state, activeClients) => ({
+      ...state,
+      activeClients
     })
   },
   ciscoInitialState

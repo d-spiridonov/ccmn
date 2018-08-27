@@ -1,14 +1,18 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { Button, Radio, Input } from 'antd'
-import { getAllMaps } from '../../reducers/cisco'
+import {
+  Button, Radio, Input, AutoComplete
+} from 'antd'
+import { getAllMaps, getAllClients } from '../../reducers/cisco'
 
 const Search = Input.Search
 class FloorMap extends Component {
   static propTypes = {
     getAllMaps: PropTypes.func.isRequired,
     floorMaps: PropTypes.array.isRequired,
+    activeClients: PropTypes.array.isRequired,
+    getAllClients: PropTypes.func.isRequired,
   }
 
   state = {
@@ -16,7 +20,8 @@ class FloorMap extends Component {
   }
 
   componentDidMount() {
-    this.props.getAllMaps()
+    if (!this.props.floorMaps) this.props.getAllMaps()
+    if (!this.props.activeClients) this.props.getAllClients()
   }
 
   handleFloorChange = e => {
@@ -27,6 +32,7 @@ class FloorMap extends Component {
 
   render() {
     const { currentFloor } = this.state
+    // const { macAddresses } = this.props
     return (
       <div>
         <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloor} onChange={this.handleFloorChange}>
@@ -35,10 +41,12 @@ class FloorMap extends Component {
           <Radio.Button value={0}>Floor 3</Radio.Button>
         </Radio.Group>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <Search
-            placeholder="Enter MAC address"
-            // onSearch={value => console.log(value)}
+          <AutoComplete
+            // dataSource={macAddresses}
             style={{ width: 200 }}
+            onSelect={this.hangleMacSelect}
+            onSearch={this.handleSearch}
+            placeholder="Enter mac address"
           />
           <Search
             placeholder="Enter x-login"
@@ -47,7 +55,7 @@ class FloorMap extends Component {
           />
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <img style={{ height: 600 }} src={this.props.floorMaps[currentFloor] ? this.props.floorMaps[currentFloor].src : null} />
+          <img style={{ height: 600 }} src={(this.props.floorMaps || {})[currentFloor] ? this.props.floorMaps[currentFloor].src : null} />
         </div>
       </div>
     )
@@ -56,11 +64,13 @@ class FloorMap extends Component {
 
 
 const mapStateToProps = state => ({
-  floorMaps: state.cisco.floorImage,
+  floorMaps: state.cisco.floorImages,
+  activeClients: state.cisco.activeClients,
 })
 
 const mapDispatchToProps = dispatch => ({
-  getAllMaps: () => dispatch(getAllMaps())
+  getAllMaps: () => dispatch(getAllMaps()),
+  getAllClients: () => dispatch(getAllClients())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(FloorMap)
