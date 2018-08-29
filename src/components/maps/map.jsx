@@ -51,12 +51,26 @@ class FloorMap extends Component {
   hangleMacSelect = macAddress => {
     const selectedMac = this.props.getSelectedMac(macAddress)
     if (!selectedMac) return
+    console.log(selectedMac)
     const floorString = selectedMac.mapInfo.mapHierarchyString
     const currentFloor = this.getMacFloor(selectedMac)
+    this.drawCoordinates(selectedMac.mapCoordinate.x * 0.8, selectedMac.mapCoordinate.y * 0.8)
     this.setState({
       selectedMac,
       currentFloor
     })
+  }
+
+  drawCoordinates(x, y) {
+    var pointSize = 10 // Change according to the size of the point.
+    var ctx = document.getElementById('canvas').getContext('2d')
+
+
+    ctx.fillStyle = '#ff2626' // Red color
+
+    ctx.beginPath() // Start path
+    ctx.arc(x, y, pointSize, 0, Math.PI * 2, true) // Draw a point using the arc function of the canvas with a point structure.
+    ctx.fill() // Close the path and fill.
   }
 
   render() {
@@ -79,7 +93,8 @@ class FloorMap extends Component {
           />
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <img style={{ height: 600 }} src={(this.props.floorMaps || {})[currentFloor] ? this.props.floorMaps[currentFloor].src : null} />
+          <canvas style={{ position: 'absolute', zIndex: 99 }} id="canvas" width="1772.8" height="900.8" />
+          <img style={{ height: 900.8 }} src={(this.props.floorMaps || {})[currentFloor] ? this.props.floorMaps[currentFloor].src : null} />
         </div>
       </div>
     )
