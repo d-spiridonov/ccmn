@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete
+  Button, Radio, Input, AutoComplete,
 } from 'antd'
-import { getAllMaps, getAllClients } from '../../reducers/cisco'
+import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
 
 const Search = Input.Search
 class FloorMap extends Component {
@@ -13,10 +13,12 @@ class FloorMap extends Component {
     floorMaps: PropTypes.array.isRequired,
     activeMacAddresses: PropTypes.array.isRequired,
     getAllClients: PropTypes.func.isRequired,
+    getSelectedMac: PropTypes.func.isRequired,
   }
 
   state = {
-    currentFloor: 1
+    currentFloor: 1,
+    selectedMac: null,
   }
 
   requestNewClients = () => {
@@ -39,9 +41,27 @@ class FloorMap extends Component {
     })
   }
 
+  getMacFloor = mac => {
+    const floorString = mac.mapInfo.mapHierarchyString
+    if (floorString.includes('1st_floor')) return 1
+    if (floorString.includes('2nd_floor')) return 2
+    return 0
+  }
+
+  hangleMacSelect = macAddress => {
+    const selectedMac = this.props.getSelectedMac(macAddress)
+    if (!selectedMac) return
+    const floorString = selectedMac.mapInfo.mapHierarchyString
+    const currentFloor = this.getMacFloor(selectedMac)
+    this.setState({
+      selectedMac,
+      currentFloor
+    })
+  }
+
   render() {
     const { currentFloor } = this.state
-    // const { macAddresses } = this.props
+    const { activeMacAddresses } = this.props
     return (
       <div>
         <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloor} onChange={this.handleFloorChange}>
@@ -51,16 +71,11 @@ class FloorMap extends Component {
         </Radio.Group>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <AutoComplete
-            // dataSource={macAddresses}
+            dataSource={activeMacAddresses}
             style={{ width: 200 }}
             onSelect={this.hangleMacSelect}
-            onSearch={this.handleSearch}
-            placeholder="Enter mac address"
-          />
-          <Search
-            placeholder="Enter x-login"
-            // onSearch={value => console.log(value)}
-            style={{ width: 200 }}
+            placeholder="Enter mac address to search"
+            filterOption
           />
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -74,12 +89,13 @@ class FloorMap extends Component {
 
 const mapStateToProps = state => ({
   floorMaps: state.cisco.floorImages,
-  activeMacAddresses: state.cisco.activeClients,
+  activeMacAddresses: state.cisco.activeMacAddresses,
 })
 
 const mapDispatchToProps = dispatch => ({
   getAllMaps: () => dispatch(getAllMaps()),
-  getAllClients: () => dispatch(getAllClients())
+  getAllClients: () => dispatch(getAllClients()),
+  getSelectedMac: macAddress => dispatch(getSelectedMac(macAddress))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(FloorMap)

@@ -34,7 +34,8 @@ export const ciscoInitialState = {
   aesUId: null,
   visitorsToday: 0,
   floorImage: null,
-  saveActiveClients: [],
+  activeClients: [],
+  activeMacAddresses: [],
 }
 
 export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/location/v2/clients/count/')
@@ -74,6 +75,12 @@ export const getCountOfVisitorsToday = () => (dispatch, getState) => {
   } else {
     dispatch(requestCountOfVisitorsToday())
   }
+}
+
+export const getSelectedMac = macAddressToFind => (dispatch, getState) => {
+  const macAddressesList = getState().cisco.activeClients
+  const result = macAddressesList.find(macAddress => macAddress.macAddress == macAddressToFind)
+  return result || null
 }
 
 // pass an object and an path array to look for the particular key
