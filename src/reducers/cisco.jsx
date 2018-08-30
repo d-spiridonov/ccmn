@@ -7,6 +7,7 @@ export const saveTotalVisitorsToday = createAction('save total visitors today')
 export const saveFloorImages = createAction('save floor image')
 export const saveActiveClients = createAction('save active clients')
 export const saveActiveMacAddresses = createAction('save active mac addresses')
+export const saveSelectedMenuItem = createAction('save selected menu item')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -30,6 +31,7 @@ const apiClientPresence = axios.create({
 })
 
 export const ciscoInitialState = {
+  selectedMenuItem: 'dashboard',
   onlineUsers: 0,
   aesUId: null,
   visitorsToday: 0,
@@ -145,6 +147,10 @@ export default createReducer(
     [saveActiveMacAddresses]: (state, activeMacAddresses) => ({
       ...state,
       activeMacAddresses,
+    }),
+    [saveSelectedMenuItem]: (state, selectedMenuItem) => ({
+      ...state,
+      selectedMenuItem,
     })
   },
   ciscoInitialState

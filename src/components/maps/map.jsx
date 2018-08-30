@@ -19,6 +19,7 @@ class FloorMap extends Component {
   state = {
     currentFloor: 1,
     selectedMac: null,
+    macAddress: null,
   }
 
   requestNewClients = () => {
@@ -51,17 +52,25 @@ class FloorMap extends Component {
   hangleMacSelect = macAddress => {
     const selectedMac = this.props.getSelectedMac(macAddress)
     if (!selectedMac) return
-    console.log(selectedMac)
     const floorString = selectedMac.mapInfo.mapHierarchyString
     const currentFloor = this.getMacFloor(selectedMac)
     this.drawCoordinates(selectedMac.mapCoordinate.x * 0.8, selectedMac.mapCoordinate.y * 0.8)
+    console.log(macAddress)
     this.setState({
       selectedMac,
-      currentFloor
+      currentFloor,
+      macAddress,
     })
   }
 
+  clearCanvas = () => {
+    var canvas = document.getElementById('canvas')
+    const ctx = canvas.getContext('2d')
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+  }
+
   drawCoordinates(x, y) {
+    this.clearCanvas()
     var pointSize = 10 // Change according to the size of the point.
     var ctx = document.getElementById('canvas').getContext('2d')
 
@@ -73,8 +82,15 @@ class FloorMap extends Component {
     ctx.fill() // Close the path and fill.
   }
 
+  clearMacAddress = () => {
+    this.clearCanvas()
+    this.setState({
+      macAddress: null
+    })
+  }
+
   render() {
-    const { currentFloor } = this.state
+    const { currentFloor, selectedMac, macAddress } = this.state
     const { activeMacAddresses } = this.props
     return (
       <div>
@@ -83,14 +99,15 @@ class FloorMap extends Component {
           <Radio.Button value={2}>Floor 2</Radio.Button>
           <Radio.Button value={0}>Floor 3</Radio.Button>
         </Radio.Group>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: 200 }}>
           <AutoComplete
             dataSource={activeMacAddresses}
-            style={{ width: 200 }}
+            value={macAddress}
             onSelect={this.hangleMacSelect}
             placeholder="Enter mac address to search"
             filterOption
           />
+          <Button onClick={this.clearMacAddress}>Clear</Button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <canvas style={{ position: 'absolute', zIndex: 99 }} id="canvas" width="1772.8" height="900.8" />

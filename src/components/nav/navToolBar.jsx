@@ -60,13 +60,6 @@ class NavToolBar extends React.Component {
     clearInterval(this.devicesConnectedInterval)
   }
 
-  goToMap = () => {
-    this.props.push('/dashboard/map')
-  }
-
-  goToDashboard = () => {
-    this.props.push('/dashboard/dashboard')
-  }
 
   handleSelect = (event) => {
     this.props.push(`/dashboard/${event.key}`)
@@ -100,6 +93,7 @@ class NavToolBar extends React.Component {
               mode="inline"
               theme="dark"
               defaultSelectedKeys={['dashboard']}
+              selectedKeys={[]}
               onSelect={this.handleSelect}
             >
               <Menu.Item key="dashboard"><Icon type="dashboard" />Dashboard</Menu.Item>
