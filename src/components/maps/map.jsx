@@ -21,8 +21,9 @@ class FloorMap extends Component {
     currentFloor: 1,
     selectedMac: null,
     macAddress: null,
-    posX: 0,
-    posY: 0,
+    posX: 1765,
+    posY: 480.44,
+    showMacCoordinates: true,
   }
 
   requestNewClients = () => {
@@ -54,22 +55,17 @@ class FloorMap extends Component {
 
   hangleMacSelect = macAddress => {
     const selectedMac = this.props.getSelectedMac(macAddress)
+    console.log(selectedMac)
     if (!selectedMac) return
     const floorString = selectedMac.mapInfo.mapHierarchyString
     const currentFloor = this.getMacFloor(selectedMac)
-    this.drawCoordinates(selectedMac.mapCoordinate.x * 0.8, selectedMac.mapCoordinate.y * 0.8)
-    console.log(macAddress)
+    this.drawCoordinates(selectedMac.mapCoordinate.x, selectedMac.mapCoordinate.y)
     this.setState({
       selectedMac,
       currentFloor,
       macAddress,
+      showMacCoordinates: true,
     })
-  }
-
-  clearCanvas = () => {
-    var canvas = document.getElementById('canvas')
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
   }
 
   drawCoordinates(x, y) {
@@ -81,9 +77,9 @@ class FloorMap extends Component {
   }
 
   clearMacAddress = () => {
-    this.clearCanvas()
     this.setState({
-      macAddress: null
+      macAddress: null,
+      showMacCoordinates: false,
     })
   }
 
@@ -105,7 +101,7 @@ class FloorMap extends Component {
 
   render() {
     const {
-      currentFloor, selectedMac, macAddress
+      currentFloor, selectedMac, macAddress, showMacCoordinates
     } = this.state
 
     const { activeMacAddresses, floorMaps } = this.props
@@ -131,14 +127,14 @@ class FloorMap extends Component {
           {floorMaps && (
           <div
             style={{
-              position: 'absolute', zIndex: 99, width: floorMaps[currentFloor].width * 0.8, height: floorMaps[currentFloor].height * 0.8
+              position: 'absolute', zIndex: 99, width: floorMaps[currentFloor].width, height: floorMaps[currentFloor].height
             }}
             id="canvas"
           >
-            <div style={this.getCircleCoordinates()} />
+            {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
           </div>
           )}
-          <img style={{ height: 900.8 }} src={(this.props.floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
+          <img style={{ height: floorMaps[currentFloor].height }} src={(this.props.floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
         </div>
       </div>
     )
