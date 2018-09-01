@@ -9,7 +9,8 @@ import moment from 'moment'
 import { push } from 'react-router-redux'
 import {
   getNumberOfOnlineUsers,
-  getCountOfVisitorsToday
+  getCountOfVisitorsToday,
+  saveSelectedMenuItem
 } from '../../reducers/cisco'
 
 const { Header, Content, Sider } = Layout
@@ -31,6 +32,8 @@ class NavToolBar extends React.Component {
     visitorsToday: PropTypes.number.isRequired,
     getCountOfVisitorsToday: PropTypes.func.isRequired,
     push: PropTypes.func.isRequired,
+    selectedMenuItem: PropTypes.string.isRequired,
+    saveSelectedMenuItem: PropTypes.func.isRequired,
   }
 
   toggle = () => {
@@ -62,12 +65,16 @@ class NavToolBar extends React.Component {
 
 
   handleSelect = (event) => {
+    this.props.saveSelectedMenuItem(event.key)
     this.props.push(`/dashboard/${event.key}`)
   }
 
   render() {
-    const { children, onlineUsers, visitorsToday } = this.props
+    const {
+      children, onlineUsers, visitorsToday, selectedMenuItem
+    } = this.props
     const { dateAndTime } = this.state
+
 
     return (
       <Layout style={{ height: '100%' }}>
@@ -92,8 +99,7 @@ class NavToolBar extends React.Component {
             <Menu
               mode="inline"
               theme="dark"
-              defaultSelectedKeys={['dashboard']}
-              selectedKeys={[]}
+              selectedKeys={[selectedMenuItem]}
               onSelect={this.handleSelect}
             >
               <Menu.Item key="dashboard"><Icon type="dashboard" />Dashboard</Menu.Item>
@@ -118,13 +124,15 @@ class NavToolBar extends React.Component {
 
 const mapStateToProps = state => ({
   onlineUsers: state.cisco.onlineUsers,
-  visitorsToday: state.cisco.visitorsToday
+  visitorsToday: state.cisco.visitorsToday,
+  selectedMenuItem: state.cisco.selectedMenuItem,
 })
 
 const mapDispatchToProps = dispatch => ({
   getNumberOfOnlineUsers: () => dispatch(getNumberOfOnlineUsers()),
   getCountOfVisitorsToday: () => dispatch(getCountOfVisitorsToday()),
   push: path => dispatch(push(path)),
+  saveSelectedMenuItem: selectedMenuItem => dispatch(saveSelectedMenuItem(selectedMenuItem)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavToolBar)

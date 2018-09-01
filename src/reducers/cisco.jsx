@@ -17,17 +17,23 @@ const username_presence = 'RO'
 const password_presence = 'Passw0rd'
 const aesUId = ''
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
 // different instances of apiClients
 const apiClientCMX = axios.create({
   baseURL: url_cmx,
   headers: { Authorization: `Basic ${btoa(`${username_cmx}:${password_cmx}`)}` },
-  json: true
+  json: true,
+  rejectUnauthorized: false,
+  ignoreHTTPErrors: true,
 })
 
 const apiClientPresence = axios.create({
   baseURL: url_presence,
   headers: { Authorization: `Basic ${btoa(`${username_presence}:${password_presence}`)}` },
-  json: true
+  json: true,
+  rejectUnauthorized: false,
+  ignoreHTTPErrors: true,
 })
 
 export const ciscoInitialState = {
@@ -110,6 +116,7 @@ export const getAllMaps = () => dispatch => apiClientCMX.get(
   '/api/config/v1/maps',
 )
   .then(response => {
+    console.log(response)
     const floorList = getNestedObject(response.data, ['campuses', 2, 'buildingList', 0, 'floorList'])
     const filteredFloorList = floorList.filter(floor => floor.image && floor.image.imageName)
     dispatch(requestMaps(filteredFloorList))

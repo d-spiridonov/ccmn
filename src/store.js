@@ -15,6 +15,7 @@ const middleware = [thunk, routerMiddleware(history)]
 const persistConfig = {
   key: 'root',
   storage,
+  whitelist: ['auth', 'cisco'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
@@ -37,4 +38,11 @@ export const store = createStore(
   initialState,
   composedEnhancers
 )
-export const persistor = persistStore(store)
+
+// callback for when state is loaded
+const stateRehydrated = () => {
+  // do some simple initialization
+  store.dispatch({ type: 'INIT' })
+}
+
+export const persistor = persistStore(store, null, stateRehydrated)
