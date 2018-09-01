@@ -106,7 +106,9 @@ const requestMaps = floorList => dispatch => {
             '',
           ),
         )
-        imageSrcs.push({ src: `data:;base64,${base64}`, floor: floor.floorNumber })
+        imageSrcs.push({
+          src: `data:;base64,${base64}`, floor: floor.floorNumber, width: floor.image.width, height: floor.image.height
+        })
       })
   })
   dispatch(saveFloorImages(imageSrcs))
@@ -116,7 +118,6 @@ export const getAllMaps = () => dispatch => apiClientCMX.get(
   '/api/config/v1/maps',
 )
   .then(response => {
-    console.log(response)
     const floorList = getNestedObject(response.data, ['campuses', 2, 'buildingList', 0, 'floorList'])
     const filteredFloorList = floorList.filter(floor => floor.image && floor.image.imageName)
     dispatch(requestMaps(filteredFloorList))

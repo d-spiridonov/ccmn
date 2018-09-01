@@ -89,9 +89,17 @@ class FloorMap extends Component {
     })
   }
 
+  handleMacChange = event => {
+    this.setState({
+      macAddress: event
+    })
+  }
+
   render() {
-    const { currentFloor, selectedMac, macAddress } = this.state
-    const { activeMacAddresses } = this.props
+    const {
+      currentFloor, selectedMac, macAddress
+    } = this.state
+    const { activeMacAddresses, floorMaps } = this.props
     return (
       <div>
         <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloor} onChange={this.handleFloorChange}>
@@ -103,6 +111,7 @@ class FloorMap extends Component {
           <AutoComplete
             dataSource={activeMacAddresses}
             value={macAddress}
+            onChange={this.handleMacChange}
             onSelect={this.hangleMacSelect}
             placeholder="Enter mac address to search"
             filterOption
@@ -110,8 +119,8 @@ class FloorMap extends Component {
           <Button onClick={this.clearMacAddress}>Clear</Button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <canvas style={{ position: 'absolute', zIndex: 99 }} id="canvas" width="1772.8" height="900.8" />
-          <img style={{ height: 900.8 }} src={(this.props.floorMaps || {})[currentFloor] ? this.props.floorMaps[currentFloor].src : null} />
+          {floorMaps && <canvas style={{ position: 'absolute', zIndex: 99 }} id="canvas" width={floorMaps[currentFloor].width * 0.8} height={floorMaps[currentFloor].height * 0.8} />}
+          <img style={{ height: 900.8 }} src={(this.props.floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
         </div>
       </div>
     )
