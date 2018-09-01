@@ -7,6 +7,7 @@ import {
 import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
 
 const Search = Input.Search
+
 class FloorMap extends Component {
   static propTypes = {
     getAllMaps: PropTypes.func.isRequired,
@@ -20,6 +21,8 @@ class FloorMap extends Component {
     currentFloor: 1,
     selectedMac: null,
     macAddress: null,
+    posX: 0,
+    posY: 0,
   }
 
   requestNewClients = () => {
@@ -70,16 +73,11 @@ class FloorMap extends Component {
   }
 
   drawCoordinates(x, y) {
-    this.clearCanvas()
-    var pointSize = 10 // Change according to the size of the point.
-    var ctx = document.getElementById('canvas').getContext('2d')
-
-
-    ctx.fillStyle = '#ff2626' // Red color
-
-    ctx.beginPath() // Start path
-    ctx.arc(x, y, pointSize, 0, Math.PI * 2, true) // Draw a point using the arc function of the canvas with a point structure.
-    ctx.fill() // Close the path and fill.
+    console.log(x, y)
+    this.setState({
+      posX: x,
+      posY: y,
+    })
   }
 
   clearMacAddress = () => {
@@ -95,10 +93,21 @@ class FloorMap extends Component {
     })
   }
 
+  getCircleCoordinates = () => ({
+    width: 25,
+    height: 25,
+    borderRadius: 25,
+    position: 'absolute',
+    background: 'red',
+    left: this.state.posX,
+    top: this.state.posY
+  })
+
   render() {
     const {
       currentFloor, selectedMac, macAddress
     } = this.state
+
     const { activeMacAddresses, floorMaps } = this.props
     return (
       <div>
@@ -119,7 +128,16 @@ class FloorMap extends Component {
           <Button onClick={this.clearMacAddress}>Clear</Button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          {floorMaps && <canvas style={{ position: 'absolute', zIndex: 99 }} id="canvas" width={floorMaps[currentFloor].width * 0.8} height={floorMaps[currentFloor].height * 0.8} />}
+          {floorMaps && (
+          <div
+            style={{
+              position: 'absolute', zIndex: 99, width: floorMaps[currentFloor].width * 0.8, height: floorMaps[currentFloor].height * 0.8
+            }}
+            id="canvas"
+          >
+            <div style={this.getCircleCoordinates()} />
+          </div>
+          )}
           <img style={{ height: 900.8 }} src={(this.props.floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
         </div>
       </div>
