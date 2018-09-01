@@ -127,14 +127,14 @@ class FloorMap extends Component {
           {floorMaps && (
           <div
             style={{
-              position: 'absolute', zIndex: 99, width: floorMaps[currentFloor].width, height: floorMaps[currentFloor].height
+              position: 'absolute', zIndex: 99, width: 1551, height: 771
             }}
             id="canvas"
           >
             {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
           </div>
           )}
-          <img style={{ height: floorMaps[currentFloor].height }} src={(this.props.floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
+          <img style={{ height: 771 }} src={(this.props.floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
         </div>
       </div>
     )
