@@ -122,8 +122,8 @@ class FloorMap extends Component {
     } = this.state
     const { activeMacAddresses, floorMaps } = this.props
 
-    const mapHeight = currentFloor.height
-    const mapWidth = currentFloor.width
+    const mapHeight = currentFloor ? currentFloor.height : 0
+    const mapWidth = currentFloor ? currentFloor.width : 0
 
     return (
       <div>
@@ -154,7 +154,7 @@ class FloorMap extends Component {
             {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
           </div>
           )}
-          <img style={{ height: mapHeight }} src={currentFloor.src} />
+          <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
         </div>
       </div>
     )

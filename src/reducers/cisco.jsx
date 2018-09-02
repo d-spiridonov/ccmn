@@ -41,7 +41,7 @@ export const ciscoInitialState = {
   onlineUsers: 0,
   aesUId: null,
   visitorsToday: 0,
-  floorImage: null,
+  floorImages: null,
   activeClients: [],
   activeMacAddresses: [],
 }
