@@ -1,14 +1,16 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import {
-  Layout, Menu, Breadcrumb, Icon
+  Layout, Menu, Breadcrumb, Icon, Das
 } from 'antd'
 import { connect } from 'react-redux'
 import { dispatch } from 'redux-act'
 import moment from 'moment'
+import { push } from 'react-router-redux'
 import {
   getNumberOfOnlineUsers,
-  getCountOfVisitorsToday
+  getCountOfVisitorsToday,
+  saveSelectedMenuItem
 } from '../../reducers/cisco'
 
 const { Header, Content, Sider } = Layout
@@ -29,6 +31,9 @@ class NavToolBar extends React.Component {
     onlineUsers: PropTypes.number.isRequired,
     visitorsToday: PropTypes.number.isRequired,
     getCountOfVisitorsToday: PropTypes.func.isRequired,
+    push: PropTypes.func.isRequired,
+    selectedMenuItem: PropTypes.string.isRequired,
+    saveSelectedMenuItem: PropTypes.func.isRequired,
   }
 
   toggle = () => {
@@ -50,17 +55,26 @@ class NavToolBar extends React.Component {
   componentDidMount() {
     this.props.getCountOfVisitorsToday()
     this.interval = setInterval(this.setDateAndTime, 1000)
-    this.devicesConnectedTimeout = setInterval(this.getTotalDevicesConnected, 15000)
+    this.devicesConnectedInterval = setInterval(this.getTotalDevicesConnected, 15000)
   }
 
   componentWillUnmount() {
     clearInterval(this.interval)
-    clearInterval(this.devicesConnectedTimeout)
+    clearInterval(this.devicesConnectedInterval)
+  }
+
+
+  handleSelect = (event) => {
+    this.props.saveSelectedMenuItem(event.key)
+    this.props.push(`/dashboard/${event.key}`)
   }
 
   render() {
-    const { children, onlineUsers, visitorsToday } = this.props
+    const {
+      children, onlineUsers, visitorsToday, selectedMenuItem
+    } = this.props
     const { dateAndTime } = this.state
+
 
     return (
       <Layout style={{ height: '100%' }}>
@@ -85,12 +99,13 @@ class NavToolBar extends React.Component {
             <Menu
               mode="inline"
               theme="dark"
-              defaultSelectedKeys={['1']}
+              selectedKeys={[selectedMenuItem]}
+              onSelect={this.handleSelect}
             >
-              <Menu.Item key="1">option1</Menu.Item>
-              <Menu.Item key="2">option2</Menu.Item>
-              <Menu.Item key="3">option3</Menu.Item>
-              <Menu.Item key="4">option4</Menu.Item>
+              <Menu.Item key="dashboard"><Icon type="dashboard" />Dashboard</Menu.Item>
+              <Menu.Item key="2"><Icon type="pie-chart" />Metrics</Menu.Item>
+              <Menu.Item key="map"><Icon type="compass" />Maps</Menu.Item>
+              <Menu.Item key="4"><Icon type="area-chart" />Analytics</Menu.Item>
             </Menu>
           </Sider>
           <Layout>
@@ -109,12 +124,15 @@ class NavToolBar extends React.Component {
 
 const mapStateToProps = state => ({
   onlineUsers: state.cisco.onlineUsers,
-  visitorsToday: state.cisco.visitorsToday
+  visitorsToday: state.cisco.visitorsToday,
+  selectedMenuItem: state.cisco.selectedMenuItem,
 })
 
 const mapDispatchToProps = dispatch => ({
   getNumberOfOnlineUsers: () => dispatch(getNumberOfOnlineUsers()),
-  getCountOfVisitorsToday: () => dispatch(getCountOfVisitorsToday())
+  getCountOfVisitorsToday: () => dispatch(getCountOfVisitorsToday()),
+  push: path => dispatch(push(path)),
+  saveSelectedMenuItem: selectedMenuItem => dispatch(saveSelectedMenuItem(selectedMenuItem)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavToolBar)

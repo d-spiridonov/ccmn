@@ -14,6 +14,8 @@ const rootReducer = (state, action) => {
     case 'RESET':
       // clear state and log out
       return appReducer({ ...state, ...initialState }, action)
+    case 'INIT':
+      return appReducer({ ...state, cisco: { ...state.cisco, ...ciscoInitialState, } }, action)
   }
   return appReducer(state, action)
 }

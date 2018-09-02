@@ -1,7 +1,9 @@
 import React from 'react'
 import 'antd/dist/antd.css'
 import input from 'antd/lib/input'
-import { Card, Input, Button, Form, Icon } from 'antd'
+import {
+  Card, Input, Button, Form, Icon
+} from 'antd'
 import { connect } from 'react-redux'
 import { push } from 'react-router-redux'
 import PropTypes from 'prop-types'

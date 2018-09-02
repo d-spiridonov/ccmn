@@ -39,7 +39,7 @@ export const signup = params => dispatch => axios
     return user
   })
 
-export const performLogin = params => axios.post('/auth/login', params).then(res => console.log(res))
+export const performLogin = params => axios.post('/auth/login', params)
 
 export const handleSuccessfulLogin = (userRes, email) => dispatch => {
   if (!userRes.user || !userRes.token) {
