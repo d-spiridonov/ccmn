@@ -5,7 +5,6 @@ import {
   Button, Radio, Input, AutoComplete, Spin
 } from 'antd'
 import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
-import './map.css'
 
 const Search = Input.Search
 
