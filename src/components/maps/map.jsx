@@ -5,6 +5,7 @@ import {
   Button, Radio, Input, AutoComplete,
 } from 'antd'
 import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
+import './map.css'
 
 const Search = Input.Search
 
@@ -18,12 +19,13 @@ class FloorMap extends Component {
   }
 
   state = {
-    currentFloor: 1,
     selectedMac: null,
     macAddress: null,
     posX: 0,
     posY: 0,
     showMacCoordinates: false,
+    currentFloor: null,
+    currentFloorNumber: 1,
   }
 
   requestNewClients = () => {
@@ -36,13 +38,22 @@ class FloorMap extends Component {
     this.requestNewClientsInterval = setInterval(this.requestNewClients, 30000)
   }
 
+  // load the 1st floor image when the image are loaded for the first time
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.floorMaps && !prevState.currentFloor) {
+      const currentFloor = nextProps.floorMaps.find(floorMap => floorMap.floor == prevState.currentFloorNumber)
+      return { currentFloor: currentFloor || {} }
+    }
+  }
+
   componentWillUnmount() {
     clearInterval(this.requestNewClientsInterval)
   }
 
   handleFloorChange = e => {
     this.setState({
-      currentFloor: e.target.value
+      currentFloorNumber: e.target.value,
+      currentFloor: this.getFloorByFloorNumber(e.target.value)
     })
   }
 
@@ -50,26 +61,24 @@ class FloorMap extends Component {
     const floorString = mac.mapInfo.mapHierarchyString
     if (floorString.includes('1st_floor')) return 1
     if (floorString.includes('2nd_floor')) return 2
-    return 0
+    return 3
   }
 
   hangleMacSelect = macAddress => {
     const selectedMac = this.props.getSelectedMac(macAddress)
-    console.log(selectedMac)
     if (!selectedMac) return
     const floorString = selectedMac.mapInfo.mapHierarchyString
-    const currentFloor = this.getMacFloor(selectedMac)
+    const currentFloorNumber = this.getMacFloor(selectedMac)
+    this.handleFloorChange({ target: { value: currentFloorNumber } })
     this.drawCoordinates(selectedMac.mapCoordinate.x, selectedMac.mapCoordinate.y)
     this.setState({
       selectedMac,
-      currentFloor,
       macAddress,
       showMacCoordinates: true,
     })
   }
 
   drawCoordinates(x, y) {
-    console.log(x, y)
     this.setState({
       posX: x,
       posY: y,
@@ -99,21 +108,29 @@ class FloorMap extends Component {
     top: this.state.posY
   })
 
+  getFloorByFloorNumber = floorNumber => {
+    let currentFloor
+    if (this.props.floorMaps) {
+      currentFloor = this.props.floorMaps.find(floorMap => floorMap.floor == floorNumber)
+    }
+    return currentFloor || null
+  }
+
   render() {
     const {
-      currentFloor, selectedMac, macAddress, showMacCoordinates
+      currentFloor, selectedMac, macAddress, showMacCoordinates, currentFloorNumber
     } = this.state
     const { activeMacAddresses, floorMaps } = this.props
 
-    const mapHeight = (floorMaps || {})[currentFloor] ? floorMaps[currentFloor].height : 0
-    const mapWidth = (floorMaps || {})[currentFloor] ? floorMaps[currentFloor].width : 0
+    const mapHeight = currentFloor.height
+    const mapWidth = currentFloor.width
 
     return (
       <div>
-        <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloor} onChange={this.handleFloorChange}>
+        <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloorNumber} onChange={this.handleFloorChange}>
           <Radio.Button value={1}>Floor 1</Radio.Button>
           <Radio.Button value={2}>Floor 2</Radio.Button>
-          <Radio.Button value={0}>Floor 3</Radio.Button>
+          <Radio.Button value={3}>Floor 3</Radio.Button>
         </Radio.Group>
         <div style={{ display: 'flex', flexDirection: 'column', width: 200 }}>
           <AutoComplete
@@ -126,7 +143,7 @@ class FloorMap extends Component {
           />
           <Button onClick={this.clearMacAddress}>Clear</Button>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
           {floorMaps && (
           <div
             style={{
@@ -137,7 +154,7 @@ class FloorMap extends Component {
             {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
           </div>
           )}
-          <img style={{ height: mapHeight }} src={(floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
+          <img style={{ height: mapHeight }} src={currentFloor.src} />
         </div>
       </div>
     )
