@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Menu
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch
 } from 'antd'
 import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
 import './map.css'
@@ -71,7 +71,7 @@ class FloorMap extends Component {
     const floorString = selectedMac.mapInfo.mapHierarchyString
     const currentFloorNumber = this.getMacFloor(selectedMac)
     this.handleFloorChange({ target: { value: currentFloorNumber } })
-    this.drawCoordinates(selectedMac.mapCoordinate.x, selectedMac.mapCoordinate.y)
+    this.drawCoordinates(selectedMac.mapCoordinate.x - 5, selectedMac.mapCoordinate.y - 5) // subtracting -5 to point a more precise position
     this.setState({
       selectedMac,
       macAddress,
@@ -100,9 +100,9 @@ class FloorMap extends Component {
     })
   }
 
-  getCircleCoordinates = () => ({
-    width: 25,
-    height: 25,
+  getCircleStyle = () => ({
+    width: 15,
+    height: 15,
     borderRadius: 25,
     position: 'absolute',
     background: 'red',
@@ -146,6 +146,7 @@ class FloorMap extends Component {
             />
             <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
           </div>
+          <Slider defaultValue={30} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginRight: 50 }}>
@@ -156,7 +157,7 @@ class FloorMap extends Component {
                 }}
                 id="canvas"
               >
-                {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
+                {showMacCoordinates && <div style={this.getCircleStyle()} />}
               </div>
             ) : <Spin size="large" />}
             <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
