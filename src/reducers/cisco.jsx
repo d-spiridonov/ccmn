@@ -107,7 +107,11 @@ const requestMaps = floorList => dispatch => {
           ),
         )
         imageSrcs.push({
-          src: `data:;base64,${base64}`, floor: floor.floorNumber, width: floor.image.width, height: floor.image.height
+          src: `data:;base64,${base64}`,
+          floor: (floor || {}).floorNumber,
+          width: ((floor || {}).dimension || {}).width,
+          // yes, we take length as a height, stupid CISCO API
+          height: ((floor || {}).dimension || {}).length,
         })
       })
   })

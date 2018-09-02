@@ -21,9 +21,9 @@ class FloorMap extends Component {
     currentFloor: 1,
     selectedMac: null,
     macAddress: null,
-    posX: 1765,
-    posY: 480.44,
-    showMacCoordinates: true,
+    posX: 0,
+    posY: 0,
+    showMacCoordinates: false,
   }
 
   requestNewClients = () => {
@@ -103,8 +103,11 @@ class FloorMap extends Component {
     const {
       currentFloor, selectedMac, macAddress, showMacCoordinates
     } = this.state
-
     const { activeMacAddresses, floorMaps } = this.props
+
+    const mapHeight = (floorMaps || {})[currentFloor] ? floorMaps[currentFloor].height : 0
+    const mapWidth = (floorMaps || {})[currentFloor] ? floorMaps[currentFloor].width : 0
+
     return (
       <div>
         <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloor} onChange={this.handleFloorChange}>
@@ -127,14 +130,14 @@ class FloorMap extends Component {
           {floorMaps && (
           <div
             style={{
-              position: 'absolute', zIndex: 99, width: 1551, height: 771
+              position: 'absolute', zIndex: 99, width: mapWidth, height: mapHeight
             }}
             id="canvas"
           >
             {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
           </div>
           )}
-          <img style={{ height: 771 }} src={(this.props.floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
+          <img style={{ height: mapHeight }} src={(floorMaps || {})[currentFloor] ? floorMaps[currentFloor].src : null} />
         </div>
       </div>
     )
