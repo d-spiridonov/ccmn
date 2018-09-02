@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete,
+  Button, Radio, Input, AutoComplete, Spin
 } from 'antd'
 import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
 
@@ -11,7 +11,7 @@ const Search = Input.Search
 class FloorMap extends Component {
   static propTypes = {
     getAllMaps: PropTypes.func.isRequired,
-    floorMaps: PropTypes.array.isRequired,
+    floorMaps: PropTypes.array,
     activeMacAddresses: PropTypes.array.isRequired,
     getAllClients: PropTypes.func.isRequired,
     getSelectedMac: PropTypes.func.isRequired,
@@ -32,17 +32,18 @@ class FloorMap extends Component {
   }
 
   componentDidMount() {
-    if (!this.props.floorMaps) this.props.getAllMaps()
+    if (!this.state.currentFloor) this.props.getAllMaps()
     this.requestNewClients()
     this.requestNewClientsInterval = setInterval(this.requestNewClients, 30000)
   }
 
   // load the 1st floor image when the image are loaded for the first time
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.floorMaps && !prevState.currentFloor) {
+    if (nextProps.floorMaps) {
       const currentFloor = nextProps.floorMaps.find(floorMap => floorMap.floor == prevState.currentFloorNumber)
-      return { currentFloor: currentFloor || {} }
+      return { currentFloor }
     }
+    return null
   }
 
   componentWillUnmount() {
@@ -121,8 +122,8 @@ class FloorMap extends Component {
     } = this.state
     const { activeMacAddresses, floorMaps } = this.props
 
-    const mapHeight = currentFloor.height
-    const mapWidth = currentFloor.width
+    const mapHeight = currentFloor ? currentFloor.height : 0
+    const mapWidth = currentFloor ? currentFloor.width : 0
 
     return (
       <div>
@@ -143,17 +144,17 @@ class FloorMap extends Component {
           <Button onClick={this.clearMacAddress}>Clear</Button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          {floorMaps && (
-          <div
-            style={{
-              position: 'absolute', zIndex: 99, width: mapWidth, height: mapHeight
-            }}
-            id="canvas"
-          >
-            {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
-          </div>
-          )}
-          <img style={{ height: mapHeight }} src={currentFloor.src} />
+          {currentFloor ? (
+            <div
+              style={{
+                position: 'absolute', zIndex: 99, width: mapWidth, height: mapHeight
+              }}
+              id="canvas"
+            >
+              {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
+            </div>
+          ) : <Spin size="large" />}
+          <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
         </div>
       </div>
     )
