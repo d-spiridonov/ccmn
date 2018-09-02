@@ -2,9 +2,10 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin
+  Button, Radio, Input, AutoComplete, Spin, Card, Menu
 } from 'antd'
 import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
+import './map.css'
 
 const Search = Input.Search
 
@@ -89,6 +90,7 @@ class FloorMap extends Component {
     this.setState({
       macAddress: null,
       showMacCoordinates: false,
+      selectedMac: null,
     })
   }
 
@@ -127,38 +129,66 @@ class FloorMap extends Component {
 
     return (
       <div>
-        <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloorNumber} onChange={this.handleFloorChange}>
-          <Radio.Button value={1}>Floor 1</Radio.Button>
-          <Radio.Button value={2}>Floor 2</Radio.Button>
-          <Radio.Button value={3}>Floor 3</Radio.Button>
-        </Radio.Group>
-        <div style={{ display: 'flex', flexDirection: 'column', width: 200 }}>
-          <AutoComplete
-            dataSource={activeMacAddresses}
-            value={macAddress}
-            onChange={this.handleMacChange}
-            onSelect={this.hangleMacSelect}
-            placeholder="Enter mac address to search"
-            filterOption
-          />
-          <Button onClick={this.clearMacAddress}>Clear</Button>
+        <div style={{ width: 232, flexDirection: 'column' }}>
+          <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloorNumber} onChange={this.handleFloorChange}>
+            <Radio.Button value={1}>Floor 1</Radio.Button>
+            <Radio.Button value={2}>Floor 2</Radio.Button>
+            <Radio.Button value={3}>Floor 3</Radio.Button>
+          </Radio.Group>
+          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <AutoComplete
+              dataSource={activeMacAddresses}
+              value={macAddress}
+              onChange={this.handleMacChange}
+              onSelect={this.hangleMacSelect}
+              placeholder="Enter mac address to search"
+              filterOption
+            />
+            <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
+          </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          {currentFloor ? (
-            <div
-              style={{
-                position: 'absolute', zIndex: 99, width: mapWidth, height: mapHeight
-              }}
-              id="canvas"
-            >
-              {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
-            </div>
-          ) : <Spin size="large" />}
-          <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginRight: 50 }}>
+            {currentFloor ? (
+              <div
+                style={{
+                  position: 'absolute', zIndex: 99, width: mapWidth, height: mapHeight
+                }}
+                id="canvas"
+              >
+                {showMacCoordinates && <div style={this.getCircleCoordinates()} />}
+              </div>
+            ) : <Spin size="large" />}
+            <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
+          </div>
+          <MacData selectedMac={selectedMac} />
         </div>
       </div>
     )
   }
+}
+
+const MacData = ({ selectedMac }) => (
+  <Card title="Client" style={{ width: 300 }}>
+    <div>
+      <p className="BlueHeader">MAC Address:</p>
+      <p>{selectedMac && selectedMac.macAddress}</p>
+      <p className="BlueHeader">IP Address:</p>
+      <p>{selectedMac && selectedMac.ipAddress ? selectedMac.ipAddress[0] : null}</p>
+      <p className="BlueHeader">Last seen:</p>
+      <p>{selectedMac && selectedMac.statistics.lastLocatedTime}</p>
+      <p className="BlueHeader">Manufacturer:</p>
+      <p>{selectedMac && selectedMac.manufacturer}</p>
+      <p className="BlueHeader">Connected AP:</p>
+      <p>{selectedMac && selectedMac.statistics.maxDetectedRssi.apMacAddress}</p>
+      <p className="BlueHeader">Connected AP Name:</p>
+      <p className="BlueHeader">SSID:</p>
+      <p>{selectedMac && selectedMac.ssId}</p>
+    </div>
+  </Card>)
+
+MacData.propTypes = {
+  selectedMac: PropTypes.object,
 }
 
 
