@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox
 } from 'antd'
 import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
 import './map.css'
@@ -100,15 +100,28 @@ class FloorMap extends Component {
     })
   }
 
-  getCircleStyle = () => ({
-    width: 15,
-    height: 15,
-    borderRadius: 25,
-    position: 'absolute',
-    background: 'red',
-    left: this.state.posX,
-    top: this.state.posY
-  })
+  getCircleStyle = color => {
+    switch (color) {
+      case 'red':
+        return {
+          width: 15,
+          height: 15,
+          borderRadius: 25,
+          position: 'absolute',
+          background: 'red',
+          left: this.state.posX,
+          top: this.state.posY
+        }
+      case 'green':
+        return {
+          width: 15,
+          height: 15,
+          borderRadius: 25,
+          position: 'relative',
+          background: 'green',
+        }
+    }
+  }
 
   getFloorByFloorNumber = floorNumber => {
     let currentFloor
@@ -146,8 +159,8 @@ class FloorMap extends Component {
             />
             <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
           </div>
-          <Slider defaultValue={30} />
         </div>
+        <CountConnected getCircleStyle={this.getCircleStyle} />
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginRight: 50 }}>
             {currentFloor ? (
@@ -157,7 +170,7 @@ class FloorMap extends Component {
                 }}
                 id="canvas"
               >
-                {showMacCoordinates && <div style={this.getCircleStyle()} />}
+                {showMacCoordinates && <div style={this.getCircleStyle('red')} />}
               </div>
             ) : <Spin size="large" />}
             <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
@@ -167,6 +180,20 @@ class FloorMap extends Component {
       </div>
     )
   }
+}
+
+const CountConnected = ({ getCircleStyle }) => (
+  <div style={{ width: 250, marginTop: 50 }}>
+    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+      <Checkbox />
+      <span>Show Connected Devices</span> <div style={getCircleStyle('green')} />
+    </div>
+    <Slider defaultValue={30} />
+  </div>
+)
+
+CountConnected.propTypes = {
+  getCircleStyle: PropTypes.func.isRequired,
 }
 
 const MacData = ({ selectedMac }) => (
