@@ -11,6 +11,15 @@ import './map.css'
 
 const Search = Input.Search
 
+const styles = {
+  greenCircle: {
+    width: 15,
+    height: 15,
+    borderRadius: 25,
+    background: 'green',
+  }
+}
+
 class FloorMap extends Component {
   static propTypes = {
     getAllMaps: PropTypes.func.isRequired,
@@ -221,7 +230,7 @@ const CountConnected = ({ getCircleStyle, handleCheckboxClick, handleSliderChang
   <div style={{ width: 250, marginTop: 50 }}>
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <Checkbox onClick={handleCheckboxClick} />
-      <span>Show Connected Devices</span> <div style={getCircleStyle('green')} />
+      <span>Show Connected Devices</span> <div style={styles.greenCircle} />
     </div>
     <Slider defaultValue={5} max={100} min={1} onChange={handleSliderChange} />
     <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
