@@ -4,7 +4,9 @@ import { connect } from 'react-redux'
 import {
   Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox
 } from 'antd'
-import { getAllMaps, getAllClients, getSelectedMac } from '../../reducers/cisco'
+import {
+  getAllMaps, getAllClients, getSelectedMac, getConnectedDevicesFromCurrentFloor
+} from '../../reducers/cisco'
 import './map.css'
 
 const Search = Input.Search
@@ -16,6 +18,7 @@ class FloorMap extends Component {
     activeMacAddresses: PropTypes.array.isRequired,
     getAllClients: PropTypes.func.isRequired,
     getSelectedMac: PropTypes.func.isRequired,
+    getConnectedDevicesFromCurrentFloor: PropTypes.func.isRequired,
   }
 
   state = {
@@ -26,6 +29,10 @@ class FloorMap extends Component {
     showMacCoordinates: false,
     currentFloor: null,
     currentFloorNumber: 1,
+    showConnectedDevices: false,
+    connectedDevicesToShow: 5,
+    connectedDevicesFromCurrentFloor: null,
+    showConnectedDevicesFromCurrentFloor: false,
   }
 
   requestNewClients = () => {
@@ -100,7 +107,7 @@ class FloorMap extends Component {
     })
   }
 
-  getCircleStyle = color => {
+  getCircleStyle = (color, x, y) => {
     switch (color) {
       case 'red':
         return {
@@ -109,16 +116,18 @@ class FloorMap extends Component {
           borderRadius: 25,
           position: 'absolute',
           background: 'red',
-          left: this.state.posX,
-          top: this.state.posY
+          left: x,
+          top: y,
         }
       case 'green':
         return {
           width: 15,
           height: 15,
           borderRadius: 25,
-          position: 'relative',
+          position: 'absolute',
           background: 'green',
+          left: x,
+          top: y,
         }
     }
   }
@@ -131,9 +140,33 @@ class FloorMap extends Component {
     return currentFloor || null
   }
 
+  handleCheckboxClick = () => {
+    let connectedDevicesFromCurrentFloor
+    if (!this.state.showConnectedDevices) {
+      connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor(this.state.currentFloorNumber, this.state.connectedDevicesToShow)
+    }
+    this.setState(prevState => ({
+      showConnectedDevices: !prevState.showConnectedDevices,
+      connectedDevicesFromCurrentFloor: connectedDevicesFromCurrentFloor || prevState.connectedDevicesFromCurrentFloor,
+      showConnectedDevicesFromCurrentFloor: !prevState.showConnectedDevicesFromCurrentFloor,
+    }))
+  }
+
+  handleConnectedDevicesSliderChange = connectedDevicesToShow => {
+    let connectedDevicesFromCurrentFloor
+    if (this.state.showConnectedDevices) {
+      connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor(this.state.currentFloorNumber, connectedDevicesToShow)
+    }
+    this.setState(prevState => ({
+      connectedDevicesToShow,
+      connectedDevicesFromCurrentFloor: connectedDevicesFromCurrentFloor || prevState.connectedDevicesFromCurrentFloor
+    }))
+  }
+
   render() {
     const {
-      currentFloor, selectedMac, macAddress, showMacCoordinates, currentFloorNumber
+      currentFloor, selectedMac, macAddress, showMacCoordinates, currentFloorNumber,
+      connectedDevicesFromCurrentFloor, showConnectedDevicesFromCurrentFloor
     } = this.state
     const { activeMacAddresses, floorMaps } = this.props
 
@@ -160,7 +193,7 @@ class FloorMap extends Component {
             <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
           </div>
         </div>
-        <CountConnected getCircleStyle={this.getCircleStyle} />
+        <CountConnected getCircleStyle={this.getCircleStyle} handleCheckboxClick={this.handleCheckboxClick} handleSliderChange={this.handleConnectedDevicesSliderChange} />
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginRight: 50 }}>
             {currentFloor ? (
@@ -170,7 +203,9 @@ class FloorMap extends Component {
                 }}
                 id="canvas"
               >
-                {showMacCoordinates && <div style={this.getCircleStyle('red')} />}
+                {showMacCoordinates && <div style={this.getCircleStyle('red', this.state.posX, this.state.posY)} />}
+                {showConnectedDevicesFromCurrentFloor && connectedDevicesFromCurrentFloor
+                && connectedDevicesFromCurrentFloor.map(device => <div key={device.macAddress} id={device.macAddress} style={this.getCircleStyle('green', device.mapCoordinate.x, device.mapCoordinate.y)} />)}
               </div>
             ) : <Spin size="large" />}
             <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
@@ -182,18 +217,28 @@ class FloorMap extends Component {
   }
 }
 
-const CountConnected = ({ getCircleStyle }) => (
+const CountConnected = ({ getCircleStyle, handleCheckboxClick, handleSliderChange }) => (
   <div style={{ width: 250, marginTop: 50 }}>
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-      <Checkbox />
+      <Checkbox onClick={handleCheckboxClick} />
       <span>Show Connected Devices</span> <div style={getCircleStyle('green')} />
     </div>
-    <Slider defaultValue={30} />
+    <Slider defaultValue={5} max={100} min={1} onChange={handleSliderChange} />
+    <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
+      <span>
+    1
+      </span>
+      <span>
+    100
+      </span>
+    </div>
   </div>
 )
 
 CountConnected.propTypes = {
   getCircleStyle: PropTypes.func.isRequired,
+  handleCheckboxClick: PropTypes.func.isRequired,
+  handleSliderChange: PropTypes.func.isRequired,
 }
 
 const MacData = ({ selectedMac }) => (
@@ -228,6 +273,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   getAllMaps: () => dispatch(getAllMaps()),
   getAllClients: () => dispatch(getAllClients()),
+  getConnectedDevicesFromCurrentFloor: (floor, numberOfConnected) => dispatch(getConnectedDevicesFromCurrentFloor(floor, numberOfConnected)),
   getSelectedMac: macAddress => dispatch(getSelectedMac(macAddress))
 })
 

@@ -134,6 +134,26 @@ export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v
     dispatch(saveActiveMacAddresses(activeMacAddresses))
   })
 
+const isMacFloorSelected = (floor, deviceFloor) => {
+  if ((deviceFloor.includes('1st_floor') && floor == 1) || (deviceFloor.includes('2nd_floor')
+&& floor == 2) || (deviceFloor.includes('3rd_floor') && floor == 3)) return true
+  return false
+}
+
+export const getConnectedDevicesFromCurrentFloor = (floor, numberOfConnected) => (dispatch, getState) => {
+  const activeClients = getState().cisco.activeClients
+  // slice the array up to number of elements in the array and then filter them according to the floor chosen
+  let returned = 0
+  const devicesOnCurrentFloor = activeClients.filter(client => {
+    if (returned < numberOfConnected && isMacFloorSelected(floor, client.mapInfo.mapHierarchyString)) {
+      returned++
+      return client
+    }
+    return false
+  })
+  return devicesOnCurrentFloor
+}
+
 export default createReducer(
   {
     [saveOnlineUsers]: (state, onlineUsers) => ({
