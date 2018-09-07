@@ -1,79 +1,43 @@
 import React, { Component } from 'react'
-import { Route, Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { Line } from 'react-chartjs-2'
 import { connect } from 'react-redux'
-import { Layout, Menu, Breadcrumb } from 'antd'
+import {
+  Layout, Radio, Row, Col
+} from 'antd'
+import RepearVisitors from './dashboard/repeatVisitors'
+import KpiSummarToday from './dashboard/kpiSummery'
 
-const { Header, Content, Footer } = Layout
+const { Header, Content, Footer, } = Layout
 
 import { getRepeatVisitorsHourlyToday } from '../reducers/cisco'
 
 
 class Dashboard extends Component {
   static propTypes = {
-    repeatVisitorsHourlyToday: PropTypes.object,
-    getRepeatVisitorsHourlyToday: PropTypes.func
+
   }
 
   componentDidMount() {
-    this.props.getRepeatVisitorsHourlyToday()
-  }
 
-  renderChart = type => {
-    if (type) return Object.keys(this.props.repeatVisitorsHourlyToday).map(index => this.props.repeatVisitorsHourlyToday[index][type])
-    return Object.keys(this.props.repeatVisitorsHourlyToday).map(hour => {
-      let label = `${hour} ${parseInt(hour) >= 12 ? 'pm' : 'am'}`
-      return label
-    })
   }
 
   render() {
-    const data = {
-      labels: this.renderChart(null),
-      datasets: [{
-        data: this.renderChart('DAILY'),
-        label: 'DAILY',
-        fill: false
-      },
-      {
-        data: this.renderChart('WEEKLY'),
-        label: 'WEEKLY',
-        fill: false
-      },
-      {
-        data: this.renderChart('OCCASIONAL'),
-        label: 'OCCASIONAL',
-        fill: false
-      },
-      {
-        data: this.renderChart('FIRST_TIME'),
-        label: 'FIRST_TIME',
-        fill: false
-      },
-      {
-        data: this.renderChart('YESTERDAY'),
-        label: 'YESTERDAY',
-        fill: false
-      }
-      ]
-    }
     return (
       <div>
-        <Content>
-          <Line data={data} />
-        </Content>
+        <Radio.Group style={{ display: 'flex', flexDirection: 'row' }}>
+          <Radio.Button value={1}>Repeat Visitors</Radio.Button>
+          <Radio.Button value={2}>TODAY</Radio.Button>
+          <Radio.Button value={3}>Floor 3</Radio.Button>
+        </Radio.Group>
+        <Row type="flex" justify="space-around" align="middle" gutter={24}>
+          <Col className="gutter-row" span={2}>Prev</Col>
+          <KpiSummarToday />
+          <Col className="gutter-row" span={2}>Next</Col>
+        </Row>
       </div>
     )
   }
 }
 
-const dashboardStateToProps = state => ({
-  repeatVisitorsHourlyToday: state.cisco.repeatVisitorsHourlyToday,
-})
-
-const dashboardDispatchToProps = dispatch => ({
-  getRepeatVisitorsHourlyToday: () => dispatch(getRepeatVisitorsHourlyToday()),
-})
-
-export default connect(dashboardStateToProps, dashboardDispatchToProps)(Dashboard)
+export default (Dashboard)

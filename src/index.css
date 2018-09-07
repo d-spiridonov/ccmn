@@ -14,3 +14,22 @@ body {
 button:disabled {
   opacity: 0.5;
 }
+
+h1{
+  text-align: left;
+  margin: 40px 0 50px 0;
+  font-size: 3rem;
+}
+
+h2{
+  text-align: center;
+  font-size: 2rem;
+  margin: 40px 0 50px 0;
+}
+
+
+/* ANT CORRECTION */
+
+.ant-layout {
+  background: white;
+}
