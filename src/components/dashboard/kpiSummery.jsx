@@ -10,7 +10,6 @@ const { Header, Content, Footer, } = Layout
 
 import { getKpiSummarToday } from '../../reducers/cisco'
 
-
 class kpiSummarToday extends Component {
   static propTypes = {
     kpiSummarToday: PropTypes.object,
@@ -25,7 +24,7 @@ class kpiSummarToday extends Component {
 
   render() {
     const data = {
-      labels: Object.keys(this.props.kpiSummarToday.topManufacturers.manufacturerCounts),
+      labels: Object.keys(this.props.kpiSummarToday.topManufacturers.manufacturerCounts).map(x => x.substring(0, 12)),
       datasets: [
         {
           label: 'Manufacturer',
@@ -40,9 +39,9 @@ class kpiSummarToday extends Component {
     }
     return (
       <Col className="gutter-row" span={20}>
-        <Content>
+        <Content style={{ 'max-height': '60vh' }}>
           <h1>General</h1>
-          <HorizontalBar data={data} />
+          <HorizontalBar data={data} width={100} height={40} />
         </Content>
       </Col>
     )

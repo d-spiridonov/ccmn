@@ -32,7 +32,7 @@ class Dashboard extends Component {
         </Radio.Group>
         <Row type="flex" justify="space-around" align="middle" gutter={24}>
           <Col className="gutter-row" span={2}>Prev</Col>
-          <KpiSummarToday />
+          <RepearVisitors />
           <Col className="gutter-row" span={2}>Next</Col>
         </Row>
       </div>

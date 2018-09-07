@@ -24,7 +24,7 @@ class RepearVisitors extends Component {
   renderChart = type => {
     if (type) return Object.keys(this.props.repeatVisitorsHourlyToday).map(index => this.props.repeatVisitorsHourlyToday[index][type])
     return Object.keys(this.props.repeatVisitorsHourlyToday).map(hour => {
-      let label = `${hour} ${parseInt(hour) >= 12 ? 'pm' : 'am'}`
+      let label = `${parseInt(hour) > 12 ? hour - 12 : hour} ${parseInt(hour) > 12 ? 'pm' : 'am'}`
       return label
     })
   }
@@ -36,54 +36,64 @@ class RepearVisitors extends Component {
         data: this.renderChart('DAILY'),
         label: 'DAILY',
         backgroundColor: [
-          'rgba(255, 99, 132, 0.2)'
+          'rgba(53, 162, 235, 1)'
         ],
+        borderColor: ['rgba(53, 162, 235, 0.4)'],
         fill: false
       },
       {
         data: this.renderChart('WEEKLY'),
         label: 'WEEKLY',
+        backgroundColor: [
+          'rgba(255, 99, 132, 1)'
+        ],
+        borderColor: ['rgba(255,99,132, 0.4)'],
         fill: false
       },
       {
         data: this.renderChart('OCCASIONAL'),
+        backgroundColor: [
+          'rgba(74, 191, 191, 1)'
+        ],
+        borderColor: ['rgba(74, 191, 191, 0.4)'],
         label: 'OCCASIONAL',
         fill: false
       },
       {
         data: this.renderChart('FIRST_TIME'),
         label: 'FIRST_TIME',
+        backgroundColor: [
+          'rgba(255, 206, 86, 1)'
+        ],
+        borderColor: ['rgba(255, 206, 86, 0.4)'],
         fill: false
       },
       {
         data: this.renderChart('YESTERDAY'),
+        backgroundColor: [
+          'rgba(101, 0, 251, 1)'
+        ],
+        borderColor: ['rgba(101, 0, 251, 0.4)'],
+
         label: 'YESTERDAY',
         fill: false
       }
       ]
     }
-    const options = {
-      color: [
-        'red', // color for data at index 0
-        'blue', // color for data at index 1
-        'green', // color for data at index 2
-        'black', // color for data at index 3
-        // ...
-      ],
-      chartArea: {
-        backgroundColor: 'rgba(251, 85, 85, 0.4)'
-      }
-    }
     return (
       <Col className="gutter-row" span={20}>
         <h1>Repeat Visitors</h1>
         <Content>
-          <h2>Hourly Repeat Visitors</h2>
-          <Line data={data} options={options} />
+          <h2>Repeat Visitors</h2>
+          <div className="chart-box">
+            <Line data={data} width={100} height={40} />
+          </div>
         </Content>
         <Content>
-          <h2>Hourly Repeat Visitors</h2>
-          <Line data={data} options={options} />
+          <h2>Repeat Visitors</h2>
+          <div className="chart-box">
+            <Line data={data} width={100} height={40} />
+          </div>
         </Content>
       </Col>
     )

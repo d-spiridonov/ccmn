@@ -48,7 +48,11 @@ export const ciscoInitialState = {
   activeClients: [],
   activeMacAddresses: [],
   repeatVisitorsHourlyToday: null,
-  kpiSummarToday: null
+  kpiSummarToday: null,
+  dashboardCurrent: 'today',
+  dashboardStartDate: null,
+  dashboardEndDate: null,
+  dashboardListInput: ['today', 'yesterday', '3days']
 }
 
 export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/location/v2/clients/count/')
@@ -156,6 +160,7 @@ export const getRepeatVisitorsHourlyToday = () => (dispatch, getState) => {
 
 export const getKpiSummarToday = () => (dispatch, getState) => {
   const aesUId = getState().cisco.aesUId
+
   apiClientPresence.get('/api/presence/v1/kpisummary/today', {
     params: {
       siteId: aesUId,
