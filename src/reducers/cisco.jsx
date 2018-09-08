@@ -109,6 +109,7 @@ const requestMaps = floorList => dispatch => {
         imageSrcs.push({
           src: `data:;base64,${base64}`,
           floor: (floor || {}).floorNumber,
+          hierarchyName: (floor || {}).hierarchyName,
           width: ((floor || {}).dimension || {}).width,
           // yes, we take length as a height, stupid CISCO API
           height: ((floor || {}).dimension || {}).length,
@@ -153,6 +154,11 @@ export const getConnectedDevicesFromCurrentFloor = ({ floor, numberOfConnected, 
   })
   return devicesOnCurrentFloor
 }
+
+// I'll not store this data in redux as it's used only by the maps component
+export const getClientsHistory = ({
+  hierarchy, date, fromHour, toHour
+}) => dispatch => apiClientCMX.get(`/api/location/v1/history/clients?date=${date}&fromHour${fromHour}&toHour=${toHour}`)
 
 export default createReducer(
   {

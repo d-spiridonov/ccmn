@@ -55,7 +55,7 @@ class NavToolBar extends React.Component {
   componentDidMount() {
     this.props.getCountOfVisitorsToday()
     this.interval = setInterval(this.setDateAndTime, 1000)
-    this.devicesConnectedInterval = setInterval(this.getTotalDevicesConnected, 15000)
+    this.devicesConnectedInterval = setInterval(this.getTotalDevicesConnected, 10000)
   }
 
   componentWillUnmount() {

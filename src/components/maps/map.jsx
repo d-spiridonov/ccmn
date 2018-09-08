@@ -12,12 +12,21 @@ import './map.css'
 
 const Search = Input.Search
 
+// refresh interval for doing a request to get all clients/interval to update active clients on the floor
+const refreshInterval = 10000
+
 const styles = {
   greenCircle: {
     width: 15,
     height: 15,
     borderRadius: 25,
     background: 'green',
+  },
+  pinkCircle: {
+    width: 15,
+    height: 15,
+    borderRadius: 25,
+    background: 'pink',
   }
 }
 
@@ -53,7 +62,7 @@ class FloorMap extends Component {
   componentDidMount() {
     if (!this.state.currentFloor) this.props.getAllMaps()
     this.requestNewClients()
-    this.requestNewClientsInterval = setInterval(this.requestNewClients, 30000)
+    this.requestNewClientsInterval = setInterval(this.requestNewClients, refreshInterval)
   }
 
   // load the 1st floor image when the image are loaded for the first time
@@ -134,7 +143,7 @@ class FloorMap extends Component {
           background: 'red',
           borderStyle: 'solid',
           borderWidth: 'thin',
-          opacity: 0.8,
+          opacity: 0.9,
           left: x,
           top: y,
         }
@@ -146,6 +155,19 @@ class FloorMap extends Component {
           opacity: 0.7,
           position: 'absolute',
           background: 'green',
+          borderStyle: 'solid',
+          borderWidth: 'thin',
+          left: x,
+          top: y,
+        }
+      case 'pink':
+        return {
+          width: 15,
+          height: 15,
+          borderRadius: 25,
+          opacity: 0.1,
+          position: 'absolute',
+          background: 'pink',
           borderStyle: 'solid',
           borderWidth: 'thin',
           left: x,
@@ -169,12 +191,12 @@ class FloorMap extends Component {
     }))
   }
 
-  handleCheckboxClick = () => {
+  handleCountConnectedCheckboxClick = () => {
     let connectedDevicesFromCurrentFloor
     if (!this.state.showConnectedDevices) {
       // set interval for getting new devices every 30 seconds
       this.getConnectedDevicesFromCurrentFloor()
-      this.connectedDevicesInterval = setInterval(this.getConnectedDevicesFromCurrentFloor, 30000)
+      this.connectedDevicesInterval = setInterval(this.getConnectedDevicesFromCurrentFloor, refreshInterval)
     } else {
       clearInterval(this.connectedDevicesInterval)
     }
@@ -208,6 +230,14 @@ class FloorMap extends Component {
     return maxNumberOfDevicesOnCurrentFloor || 0
   }
 
+  handleHeatMapCheckboxClick = e => {
+
+  }
+
+  handleHeatMapSliderChange = e => {
+
+  }
+
   render() {
     const {
       currentFloor, selectedMac, macAddress, showMacCoordinates, currentFloorNumber,
@@ -220,31 +250,36 @@ class FloorMap extends Component {
 
 
     return (
-      <div>
-        <div style={{ width: 232, flexDirection: 'column' }}>
-          <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloorNumber} onChange={this.handleFloorChange}>
-            <Radio.Button value={1}>Floor 1</Radio.Button>
-            <Radio.Button value={2}>Floor 2</Radio.Button>
-            <Radio.Button value={3}>Floor 3</Radio.Button>
-          </Radio.Group>
-          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            <AutoComplete
-              dataSource={activeMacAddresses}
-              value={macAddress}
-              onChange={this.handleMacChange}
-              onSelect={this.hangleMacSelect}
-              placeholder="Enter mac address to search"
-              filterOption
-            />
-            <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ width: 232, flexDirection: 'column' }}>
+            <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloorNumber} onChange={this.handleFloorChange}>
+              <Radio.Button value={1}>Floor 1</Radio.Button>
+              <Radio.Button value={2}>Floor 2</Radio.Button>
+              <Radio.Button value={3}>Floor 3</Radio.Button>
+            </Radio.Group>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+              <AutoComplete
+                dataSource={activeMacAddresses}
+                value={macAddress}
+                onChange={this.handleMacChange}
+                onSelect={this.hangleMacSelect}
+                placeholder="Enter mac address to search"
+                filterOption
+              />
+              <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
+            </div>
           </div>
+          <CountConnected
+            handleCheckboxClick={this.handleCountConnectedCheckboxClick}
+            handleSliderChange={this.handleConnectedDevicesSliderChange}
+            max={this.getMaxNumberOfDevicesOnCurrentFloor()}
+          />
+          <HeatMap
+            handleCheckboxClick={this.handleHeatMapCheckboxClick}
+            handleSliderChange={this.handleHeatMapSliderChange}
+          />
         </div>
-        <CountConnected
-          getCircleStyle={this.getCircleStyle}
-          handleCheckboxClick={this.handleCheckboxClick}
-          handleSliderChange={this.handleConnectedDevicesSliderChange}
-          max={this.getMaxNumberOfDevicesOnCurrentFloor()}
-        />
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginRight: 50 }}>
             {currentFloor ? (
@@ -280,7 +315,7 @@ class FloorMap extends Component {
 }
 
 const CountConnected = ({
-  getCircleStyle, handleCheckboxClick, handleSliderChange, max,
+  handleCheckboxClick, handleSliderChange, max,
 }) => (
   <div style={{ width: 250, marginTop: 50 }}>
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -293,6 +328,9 @@ const CountConnected = ({
     1
       </span>
       <span>
+      Devices
+      </span>
+      <span>
         {max}
       </span>
     </div>
@@ -300,10 +338,47 @@ const CountConnected = ({
 )
 
 CountConnected.propTypes = {
-  getCircleStyle: PropTypes.func.isRequired,
   handleCheckboxClick: PropTypes.func.isRequired,
   handleSliderChange: PropTypes.func.isRequired,
   max: PropTypes.number.isRequired,
+}
+
+const HeatMap = ({ handleSliderChange, handleCheckboxClick }) => (
+  <div style={{ width: 250, marginTop: 50 }}>
+    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+      <Checkbox onClick={handleCheckboxClick} />
+      <span>Show Activity</span> <div style={styles.pinkCircle} />
+    </div>
+    <Slider defaultValue={5} max={30} min={1} onChange={handleSliderChange} />
+    <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
+      <span>
+        1
+      </span>
+      <span>
+      Days
+      </span>
+      <span>
+        30
+      </span>
+    </div>
+    <Slider defaultValue={0} max={24} min={0} onChange={handleSliderChange} />
+    <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
+      <span>
+        0
+      </span>
+      <span>
+      Hours
+      </span>
+      <span>
+        24
+      </span>
+    </div>
+  </div>
+)
+
+HeatMap.propTypes = {
+  handleSliderChange: PropTypes.func.isRequired,
+  handleCheckboxClick: PropTypes.func.isRequired,
 }
 
 const MacData = ({ selectedMac, currentTime }) => {
