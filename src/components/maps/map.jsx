@@ -68,10 +68,14 @@ class FloorMap extends Component {
   }
 
   handleFloorChange = e => {
+    let connectedDevicesFromCurrentFloor
+    if (this.state.showConnectedDevices) {
+      connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor({ floor: this.state.currentFloorNumber, numberOfConnected: this.state.connectedDevicesToShow, getAll: false })
+    }
     this.setState({
+      connectedDevicesFromCurrentFloor,
       currentFloorNumber: e.target.value,
       currentFloor: this.getFloorByFloorNumber(e.target.value),
-      showConnectedDevicesFromCurrentFloor: false,
     })
   }
 
