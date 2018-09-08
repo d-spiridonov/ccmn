@@ -140,12 +140,12 @@ const isMacFloorSelected = (floor, deviceFloor) => {
   return false
 }
 
-export const getConnectedDevicesFromCurrentFloor = (floor, numberOfConnected) => (dispatch, getState) => {
+export const getConnectedDevicesFromCurrentFloor = ({ floor, numberOfConnected, getAll }) => (dispatch, getState) => {
   const activeClients = getState().cisco.activeClients
   // slice the array up to number of elements in the array and then filter them according to the floor chosen
   let returned = 0
   const devicesOnCurrentFloor = activeClients.filter(client => {
-    if (returned < numberOfConnected && isMacFloorSelected(floor, client.mapInfo.mapHierarchyString)) {
+    if ((returned < numberOfConnected || getAll) && isMacFloorSelected(floor, client.mapInfo.mapHierarchyString)) {
       returned++
       return client
     }

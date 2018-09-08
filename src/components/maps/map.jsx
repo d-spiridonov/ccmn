@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover
 } from 'antd'
 import {
   getAllMaps, getAllClients, getSelectedMac, getConnectedDevicesFromCurrentFloor
@@ -70,7 +70,8 @@ class FloorMap extends Component {
   handleFloorChange = e => {
     this.setState({
       currentFloorNumber: e.target.value,
-      currentFloor: this.getFloorByFloorNumber(e.target.value)
+      currentFloor: this.getFloorByFloorNumber(e.target.value),
+      showConnectedDevicesFromCurrentFloor: false,
     })
   }
 
@@ -125,6 +126,9 @@ class FloorMap extends Component {
           borderRadius: 25,
           position: 'absolute',
           background: 'red',
+          borderStyle: 'solid',
+          borderWidth: 'thin',
+          opacity: 0.8,
           left: x,
           top: y,
         }
@@ -133,8 +137,11 @@ class FloorMap extends Component {
           width: 15,
           height: 15,
           borderRadius: 25,
+          opacity: 0.7,
           position: 'absolute',
           background: 'green',
+          borderStyle: 'solid',
+          borderWidth: 'thin',
           left: x,
           top: y,
         }
@@ -152,7 +159,7 @@ class FloorMap extends Component {
   handleCheckboxClick = () => {
     let connectedDevicesFromCurrentFloor
     if (!this.state.showConnectedDevices) {
-      connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor(this.state.currentFloorNumber, this.state.connectedDevicesToShow)
+      connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor({ floor: this.state.currentFloorNumber, numberOfConnected: this.state.connectedDevicesToShow, getAll: false })
     }
     this.setState(prevState => ({
       showConnectedDevices: !prevState.showConnectedDevices,
@@ -164,12 +171,25 @@ class FloorMap extends Component {
   handleConnectedDevicesSliderChange = connectedDevicesToShow => {
     let connectedDevicesFromCurrentFloor
     if (this.state.showConnectedDevices) {
-      connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor(this.state.currentFloorNumber, connectedDevicesToShow)
+      connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor({ floor: this.state.currentFloorNumber, numberOfConnected: connectedDevicesToShow, getAll: false })
     }
     this.setState(prevState => ({
       connectedDevicesToShow,
       connectedDevicesFromCurrentFloor: connectedDevicesFromCurrentFloor || prevState.connectedDevicesFromCurrentFloor
     }))
+  }
+
+  content = macAddress => {
+    const selectedMac = this.props.getSelectedMac(macAddress)
+    return (
+      <MacData selectedMac={selectedMac} />
+    )
+  }
+
+  getMaxNumberOfDevicesOnCurrentFloor = () => {
+    let maxNumberOfDevicesOnCurrentFloor
+    if (this.state.currentFloorNumber) maxNumberOfDevicesOnCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor({ floor: this.state.currentFloorNumber, numberOfConnected: 0, getAll: true }).length
+    return maxNumberOfDevicesOnCurrentFloor || 0
   }
 
   render() {
@@ -181,6 +201,7 @@ class FloorMap extends Component {
 
     const mapHeight = currentFloor ? currentFloor.height : 0
     const mapWidth = currentFloor ? currentFloor.width : 0
+
 
     return (
       <div>
@@ -202,7 +223,12 @@ class FloorMap extends Component {
             <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
           </div>
         </div>
-        <CountConnected getCircleStyle={this.getCircleStyle} handleCheckboxClick={this.handleCheckboxClick} handleSliderChange={this.handleConnectedDevicesSliderChange} />
+        <CountConnected
+          getCircleStyle={this.getCircleStyle}
+          handleCheckboxClick={this.handleCheckboxClick}
+          handleSliderChange={this.handleConnectedDevicesSliderChange}
+          max={this.getMaxNumberOfDevicesOnCurrentFloor()}
+        />
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginRight: 50 }}>
             {currentFloor ? (
@@ -212,33 +238,46 @@ class FloorMap extends Component {
                 }}
                 id="canvas"
               >
-                {showMacCoordinates && <div style={this.getCircleStyle('red', this.state.posX, this.state.posY)} />}
+                {showMacCoordinates
+                  && (
+                  <Popover content={this.content(selectedMac.macAddress)} title="Device" trigger="hover">
+                    <div style={this.getCircleStyle('red', this.state.posX, this.state.posY)} />
+                  </Popover>
+                  )}
                 {showConnectedDevicesFromCurrentFloor && connectedDevicesFromCurrentFloor
-                && connectedDevicesFromCurrentFloor.map(device => <div key={device.macAddress} id={device.macAddress} style={this.getCircleStyle('green', device.mapCoordinate.x, device.mapCoordinate.y)} />)}
+                && connectedDevicesFromCurrentFloor.map(device => (
+                  <Popover content={this.content(device.macAddress)} title="Device" trigger="hover">
+                    <div key={device.macAddress} id={device.macAddress} style={this.getCircleStyle('green', device.mapCoordinate.x, device.mapCoordinate.y)} />
+                  </Popover>
+                ))}
               </div>
             ) : <Spin size="large" />}
             <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
           </div>
-          <MacData selectedMac={selectedMac} />
+          <Card title="Client" style={{ width: 300 }}>
+            <MacData selectedMac={selectedMac} />
+          </Card>
         </div>
       </div>
     )
   }
 }
 
-const CountConnected = ({ getCircleStyle, handleCheckboxClick, handleSliderChange }) => (
+const CountConnected = ({
+  getCircleStyle, handleCheckboxClick, handleSliderChange, max,
+}) => (
   <div style={{ width: 250, marginTop: 50 }}>
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <Checkbox onClick={handleCheckboxClick} />
       <span>Show Connected Devices</span> <div style={styles.greenCircle} />
     </div>
-    <Slider defaultValue={5} max={100} min={1} onChange={handleSliderChange} />
+    <Slider defaultValue={5} max={max} min={1} onChange={handleSliderChange} />
     <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
       <span>
     1
       </span>
       <span>
-    100
+        {max}
       </span>
     </div>
   </div>
@@ -248,26 +287,26 @@ CountConnected.propTypes = {
   getCircleStyle: PropTypes.func.isRequired,
   handleCheckboxClick: PropTypes.func.isRequired,
   handleSliderChange: PropTypes.func.isRequired,
+  max: PropTypes.number.isRequired,
 }
 
 const MacData = ({ selectedMac }) => (
-  <Card title="Client" style={{ width: 300 }}>
-    <div>
-      <p className="BlueHeader">MAC Address:</p>
-      <p>{selectedMac && selectedMac.macAddress}</p>
-      <p className="BlueHeader">IP Address:</p>
-      <p>{selectedMac && selectedMac.ipAddress ? selectedMac.ipAddress[0] : null}</p>
-      <p className="BlueHeader">Last seen:</p>
-      <p>{selectedMac && selectedMac.statistics.lastLocatedTime}</p>
-      <p className="BlueHeader">Manufacturer:</p>
-      <p>{selectedMac && selectedMac.manufacturer}</p>
-      <p className="BlueHeader">Connected AP:</p>
-      <p>{selectedMac && selectedMac.statistics.maxDetectedRssi.apMacAddress}</p>
-      <p className="BlueHeader">Connected AP Name:</p>
-      <p className="BlueHeader">SSID:</p>
-      <p>{selectedMac && selectedMac.ssId}</p>
-    </div>
-  </Card>)
+  <div>
+    <p className="BlueHeader">MAC Address:</p>
+    <p>{selectedMac && selectedMac.macAddress}</p>
+    <p className="BlueHeader">IP Address:</p>
+    <p>{selectedMac && selectedMac.ipAddress ? selectedMac.ipAddress[0] : null}</p>
+    <p className="BlueHeader">Last seen:</p>
+    <p>{selectedMac && selectedMac.statistics.lastLocatedTime}</p>
+    <p className="BlueHeader">Manufacturer:</p>
+    <p>{selectedMac && selectedMac.manufacturer}</p>
+    <p className="BlueHeader">Connected AP:</p>
+    <p>{selectedMac && selectedMac.statistics.maxDetectedRssi.apMacAddress}</p>
+    <p className="BlueHeader">Connected AP Name:</p>
+    <p className="BlueHeader">SSID:</p>
+    <p>{selectedMac && selectedMac.ssId}</p>
+  </div>
+)
 
 MacData.propTypes = {
   selectedMac: PropTypes.object,
@@ -282,7 +321,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   getAllMaps: () => dispatch(getAllMaps()),
   getAllClients: () => dispatch(getAllClients()),
-  getConnectedDevicesFromCurrentFloor: (floor, numberOfConnected) => dispatch(getConnectedDevicesFromCurrentFloor(floor, numberOfConnected)),
+  getConnectedDevicesFromCurrentFloor: ({ floor, numberOfConnected, getAll }) => dispatch(getConnectedDevicesFromCurrentFloor({ floor, numberOfConnected, getAll })),
   getSelectedMac: macAddress => dispatch(getSelectedMac(macAddress))
 })
 
