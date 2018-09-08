@@ -2,8 +2,9 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip
 } from 'antd'
+import moment from 'moment'
 import {
   getAllMaps, getAllClients, getSelectedMac, getConnectedDevicesFromCurrentFloor
 } from '../../reducers/cisco'
@@ -42,6 +43,7 @@ class FloorMap extends Component {
     connectedDevicesToShow: 5,
     connectedDevicesFromCurrentFloor: null,
     showConnectedDevicesFromCurrentFloor: false,
+    currentTime: moment(),
   }
 
   requestNewClients = () => {
@@ -160,14 +162,24 @@ class FloorMap extends Component {
     return currentFloor || null
   }
 
+  getConnectedDevicesFromCurrentFloor = () => {
+    const connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor({ floor: this.state.currentFloorNumber, numberOfConnected: this.state.connectedDevicesToShow, getAll: false })
+    this.setState(prevState => ({
+      connectedDevicesFromCurrentFloor: connectedDevicesFromCurrentFloor || prevState.connectedDevicesFromCurrentFloor,
+    }))
+  }
+
   handleCheckboxClick = () => {
     let connectedDevicesFromCurrentFloor
     if (!this.state.showConnectedDevices) {
-      connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor({ floor: this.state.currentFloorNumber, numberOfConnected: this.state.connectedDevicesToShow, getAll: false })
+      // set interval for getting new devices every 30 seconds
+      this.getConnectedDevicesFromCurrentFloor()
+      this.connectedDevicesInterval = setInterval(this.getConnectedDevicesFromCurrentFloor, 30000)
+    } else {
+      clearInterval(this.connectedDevicesInterval)
     }
     this.setState(prevState => ({
       showConnectedDevices: !prevState.showConnectedDevices,
-      connectedDevicesFromCurrentFloor: connectedDevicesFromCurrentFloor || prevState.connectedDevicesFromCurrentFloor,
       showConnectedDevicesFromCurrentFloor: !prevState.showConnectedDevicesFromCurrentFloor,
     }))
   }
@@ -186,7 +198,7 @@ class FloorMap extends Component {
   content = macAddress => {
     const selectedMac = this.props.getSelectedMac(macAddress)
     return (
-      <MacData selectedMac={selectedMac} />
+      <MacData selectedMac={selectedMac} currentTime={this.state.currentTime} />
     )
   }
 
@@ -199,7 +211,7 @@ class FloorMap extends Component {
   render() {
     const {
       currentFloor, selectedMac, macAddress, showMacCoordinates, currentFloorNumber,
-      connectedDevicesFromCurrentFloor, showConnectedDevicesFromCurrentFloor
+      connectedDevicesFromCurrentFloor, showConnectedDevicesFromCurrentFloor, currentTime
     } = this.state
     const { activeMacAddresses, floorMaps } = this.props
 
@@ -244,13 +256,13 @@ class FloorMap extends Component {
               >
                 {showMacCoordinates
                   && (
-                  <Popover content={this.content(selectedMac.macAddress)} title="Device" trigger="hover">
+                  <Popover id={selectedMac.macAddress} content={this.content(selectedMac.macAddress)} title="Device" trigger="hover">
                     <div style={this.getCircleStyle('red', this.state.posX, this.state.posY)} />
                   </Popover>
                   )}
                 {showConnectedDevicesFromCurrentFloor && connectedDevicesFromCurrentFloor
                 && connectedDevicesFromCurrentFloor.map(device => (
-                  <Popover content={this.content(device.macAddress)} title="Device" trigger="hover">
+                  <Popover id={device.macAddress} content={this.content(device.macAddress)} title="Device" trigger="hover">
                     <div key={device.macAddress} id={device.macAddress} style={this.getCircleStyle('green', device.mapCoordinate.x, device.mapCoordinate.y)} />
                   </Popover>
                 ))}
@@ -259,7 +271,7 @@ class FloorMap extends Component {
             <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
           </div>
           <Card title="Client" style={{ width: 300 }}>
-            <MacData selectedMac={selectedMac} />
+            <MacData selectedMac={selectedMac} currentTime={currentTime} />
           </Card>
         </div>
       </div>
@@ -294,26 +306,33 @@ CountConnected.propTypes = {
   max: PropTypes.number.isRequired,
 }
 
-const MacData = ({ selectedMac }) => (
-  <div>
-    <p className="BlueHeader">MAC Address:</p>
-    <p>{selectedMac && selectedMac.macAddress}</p>
-    <p className="BlueHeader">IP Address:</p>
-    <p>{selectedMac && selectedMac.ipAddress ? selectedMac.ipAddress[0] : null}</p>
-    <p className="BlueHeader">Last seen:</p>
-    <p>{selectedMac && selectedMac.statistics.lastLocatedTime}</p>
-    <p className="BlueHeader">Manufacturer:</p>
-    <p>{selectedMac && selectedMac.manufacturer}</p>
-    <p className="BlueHeader">Connected AP:</p>
-    <p>{selectedMac && selectedMac.statistics.maxDetectedRssi.apMacAddress}</p>
-    <p className="BlueHeader">Connected AP Name:</p>
-    <p className="BlueHeader">SSID:</p>
-    <p>{selectedMac && selectedMac.ssId}</p>
-  </div>
-)
+const MacData = ({ selectedMac, currentTime }) => {
+  let lastSeen
+  if (selectedMac) lastSeen = moment(selectedMac.statistics.lastLocatedTime).from(currentTime)
+  return (
+    <div>
+      <p className="BlueHeader">MAC Address:</p>
+      <p>{selectedMac && selectedMac.macAddress}</p>
+      <p className="BlueHeader">Status:</p>
+      <Tooltip title="Indicates connected to the network as Associated and the APMacAddress is the AP which it is connected. Probing to find a valid AP to connect and the APMacAddress is the AP which has strongest reception. and Unknown for inactive client devices and clients with unknown IP addresses. Note, that CMX aggregates information from the wireless network, and therefore refer to the values defined in the AP or WLC.">
+        <p>{selectedMac && <span>{selectedMac.dot11Status} <Icon type="info-circle" theme="outlined" /></span>}</p>
+      </Tooltip>
+      <p className="BlueHeader">IP Address:</p>
+      <p>{selectedMac && selectedMac.ipAddress ? selectedMac.ipAddress[0] : null}</p>
+      <p className="BlueHeader">Last seen:</p>
+      <p>{selectedMac && lastSeen}</p>
+      <p className="BlueHeader">Manufacturer:</p>
+      <p>{selectedMac && selectedMac.manufacturer}</p>
+      <p className="BlueHeader">Connected AP:</p>
+      <p>{selectedMac && selectedMac.statistics.maxDetectedRssi.apMacAddress}</p>
+      <p className="BlueHeader">SSID:</p>
+      <p>{selectedMac && selectedMac.ssId}</p>
+    </div>)
+}
 
 MacData.propTypes = {
   selectedMac: PropTypes.object,
+  currentTime: PropTypes.object.isRequired,
 }
 
 
