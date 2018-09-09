@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, getClientsHistory
 } from 'antd'
 import moment from 'moment'
 import {
@@ -38,6 +38,7 @@ class FloorMap extends Component {
     getAllClients: PropTypes.func.isRequired,
     getSelectedMac: PropTypes.func.isRequired,
     getConnectedDevicesFromCurrentFloor: PropTypes.func.isRequired,
+    getClientsHistory: PropTypes.func.isRequired,
   }
 
   state = {
@@ -48,11 +49,17 @@ class FloorMap extends Component {
     showMacCoordinates: false,
     currentFloor: null,
     currentFloorNumber: 1,
-    showConnectedDevices: false,
     connectedDevicesToShow: 5,
     connectedDevicesFromCurrentFloor: null,
     showConnectedDevicesFromCurrentFloor: false,
     currentTime: moment(),
+    showHeatMap: false,
+    loadingClientHistory: false,
+    heatMapDateRange: [1, 5],
+    heatMapFromDate: moment().subtract(5, 'days').startOf('day'),
+    heatMapToDate: moment(),
+    heatMapFromTime: moment().startOf('day'),
+    heatMapToTime: moment().endOf('day').startOf('hour'),
   }
 
   requestNewClients = () => {
@@ -80,7 +87,7 @@ class FloorMap extends Component {
 
   handleFloorChange = e => {
     let connectedDevicesFromCurrentFloor
-    if (this.state.showConnectedDevices) {
+    if (this.state.showConnectedDevicesFromCurrentFloor) {
       connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor({ floor: this.state.currentFloorNumber, numberOfConnected: this.state.connectedDevicesToShow, getAll: false })
     }
     this.setState({
@@ -193,7 +200,7 @@ class FloorMap extends Component {
 
   handleCountConnectedCheckboxClick = () => {
     let connectedDevicesFromCurrentFloor
-    if (!this.state.showConnectedDevices) {
+    if (!this.state.showConnectedDevicesFromCurrentFloor) {
       // set interval for getting new devices every 30 seconds
       this.getConnectedDevicesFromCurrentFloor()
       this.connectedDevicesInterval = setInterval(this.getConnectedDevicesFromCurrentFloor, refreshInterval)
@@ -201,14 +208,13 @@ class FloorMap extends Component {
       clearInterval(this.connectedDevicesInterval)
     }
     this.setState(prevState => ({
-      showConnectedDevices: !prevState.showConnectedDevices,
       showConnectedDevicesFromCurrentFloor: !prevState.showConnectedDevicesFromCurrentFloor,
     }))
   }
 
   handleConnectedDevicesSliderChange = connectedDevicesToShow => {
     let connectedDevicesFromCurrentFloor
-    if (this.state.showConnectedDevices) {
+    if (this.state.showConnectedDevicesFromCurrentFloor) {
       connectedDevicesFromCurrentFloor = this.props.getConnectedDevicesFromCurrentFloor({ floor: this.state.currentFloorNumber, numberOfConnected: connectedDevicesToShow, getAll: false })
     }
     this.setState(prevState => ({
@@ -230,12 +236,38 @@ class FloorMap extends Component {
     return maxNumberOfDevicesOnCurrentFloor || 0
   }
 
-  handleHeatMapCheckboxClick = e => {
-
+  handleHeatMapCheckboxClick = () => {
+    if (!this.state.showHeatMap) {
+      this.setState({
+        loadingClientHistory: true
+      })
+      // this.props.getClientsHistory().then(res => {
+      //   console.log(res)
+      // })
+    }
   }
 
-  handleHeatMapSliderChange = e => {
+  handleHeatMapDateSliderChange = e => {
+    this.setState(prevState => {
+      const heatMapToDate = prevState.heatMapToDate
+      const newToDate = moment().add(-e, 'days').hour(prevState.heatMapToTime.get('hour')).startOf('hour')
+      heatMapToDate.set(newToDate.toObject())
+      return {
+        heatMapToDate
+      }
+    })
+  }
 
+  // here both from and to date should be overwritten by the selected time-period
+  handleHeatMapTimeSliderChange = e => {
+    this.setState(prevState => {
+      const heatMapFromDate = prevState.heatMapFromDate.hour(moment().startOf('day').add(e[0], 'hour').get('hour'))
+      const heatMapToDate = prevState.heatMapToDate.hour(moment().startOf('day').add(e[1], 'hour').get('hour'))
+      return {
+        heatMapFromDate,
+        heatMapToDate
+      }
+    })
   }
 
   render() {
@@ -249,7 +281,7 @@ class FloorMap extends Component {
     const mapWidth = currentFloor ? currentFloor.width : 0
 
 
-    return (
+    return ( // TODO: refactor to smaller components
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div>
           <div style={{ width: 232, flexDirection: 'column' }}>
@@ -277,7 +309,8 @@ class FloorMap extends Component {
           />
           <HeatMap
             handleCheckboxClick={this.handleHeatMapCheckboxClick}
-            handleSliderChange={this.handleHeatMapSliderChange}
+            handleDateSliderChange={this.handleHeatMapDateSliderChange}
+            handleTimeSliderChange={this.handleHeatMapTimeSliderChange}
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
@@ -343,13 +376,13 @@ CountConnected.propTypes = {
   max: PropTypes.number.isRequired,
 }
 
-const HeatMap = ({ handleSliderChange, handleCheckboxClick }) => (
+const HeatMap = ({ handleDateSliderChange, handleTimeSliderChange, handleCheckboxClick }) => (
   <div style={{ width: 250, marginTop: 50 }}>
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <Checkbox onClick={handleCheckboxClick} />
       <span>Show Activity</span> <div style={styles.pinkCircle} />
     </div>
-    <Slider defaultValue={5} max={30} min={1} onChange={handleSliderChange} />
+    <Slider defaultValue={5} max={30} min={1} onChange={handleDateSliderChange} />
     <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
       <span>
         1
@@ -361,7 +394,7 @@ const HeatMap = ({ handleSliderChange, handleCheckboxClick }) => (
         30
       </span>
     </div>
-    <Slider defaultValue={0} max={24} min={0} onChange={handleSliderChange} />
+    <Slider range defaultValue={[0, 23]} max={23} min={0} onChange={handleTimeSliderChange} />
     <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
       <span>
         0
@@ -370,14 +403,15 @@ const HeatMap = ({ handleSliderChange, handleCheckboxClick }) => (
       Hours
       </span>
       <span>
-        24
+        23
       </span>
     </div>
   </div>
 )
 
 HeatMap.propTypes = {
-  handleSliderChange: PropTypes.func.isRequired,
+  handleDateSliderChange: PropTypes.func.isRequired,
+  handleTimeSliderChange: PropTypes.func.isRequired,
   handleCheckboxClick: PropTypes.func.isRequired,
 }
 
@@ -417,6 +451,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
+  getClientsHistory: ({ date, fromHour, toHour }) => dispatch(getClientsHistory({ date, fromHour, toHour })),
   getAllMaps: () => dispatch(getAllMaps()),
   getAllClients: () => dispatch(getAllClients()),
   getConnectedDevicesFromCurrentFloor: ({ floor, numberOfConnected, getAll }) => dispatch(getConnectedDevicesFromCurrentFloor({ floor, numberOfConnected, getAll })),

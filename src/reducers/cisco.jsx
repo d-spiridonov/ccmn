@@ -157,8 +157,8 @@ export const getConnectedDevicesFromCurrentFloor = ({ floor, numberOfConnected, 
 
 // I'll not store this data in redux as it's used only by the maps component
 export const getClientsHistory = ({
-  hierarchy, date, fromHour, toHour
-}) => dispatch => apiClientCMX.get(`/api/location/v1/history/clients?date=${date}&fromHour${fromHour}&toHour=${toHour}`)
+  fromTime, toTime
+}) => dispatch => apiClientCMX.get(`/api/location/v1/history/clients?locatedAfterTime=${fromTime}&locatedBeforeTime=${toTime}`)
 
 export default createReducer(
   {
