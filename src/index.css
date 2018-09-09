@@ -14,3 +14,32 @@ body {
 button:disabled {
   opacity: 0.5;
 }
+
+h1{
+  text-align: left;
+  margin: 40px 0 50px 0;
+  font-size: 2rem;
+  text-align: center;
+  color: rgb(0, 21, 40);
+}
+
+h2{
+  text-align: left;
+  font-size: 1rem;
+  margin: 30px 0 30px 40px;
+  color: #0a4781;
+}
+
+
+/* ANT CORRECTION */
+
+.ant-layout {
+  background: white;
+}
+
+
+.chart-box{
+  padding: 20px 0;
+  border-top: 1px solid rgba(25, 144, 255, 0.1);
+  border-bottom: 1px solid rgba(25, 144, 255, 0.1);  
+}

@@ -1,4 +1,4 @@
-import { createReducer, createAction } from 'redux-act'
+import { createReducer, createAction, disbatch } from 'redux-act'
 import axios from 'axios'
 
 export const saveOnlineUsers = createAction('save online users')
@@ -8,6 +8,9 @@ export const saveFloorImages = createAction('save floor image')
 export const saveActiveClients = createAction('save active clients')
 export const saveActiveMacAddresses = createAction('save active mac addresses')
 export const saveSelectedMenuItem = createAction('save selected menu item')
+
+export const saveRepeatVisitorsHourlyToday = createAction('save repeat hourly visitors today')
+export const saveKpiSummarToday = createAction('save kpi summary today')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -44,6 +47,12 @@ export const ciscoInitialState = {
   floorImages: null,
   activeClients: [],
   activeMacAddresses: [],
+  repeatVisitorsHourlyToday: null,
+  kpiSummarToday: null,
+  dashboardCurrent: 'today',
+  dashboardStartDate: null,
+  dashboardEndDate: null,
+  dashboardListInput: ['today', 'yesterday', '3days']
 }
 
 export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/location/v2/clients/count/')
@@ -134,6 +143,37 @@ export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v
     dispatch(saveActiveMacAddresses(activeMacAddresses))
   })
 
+export const getRepeatVisitorsHourlyToday = () => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  apiClientPresence.get('/api/presence/v1/repeatvisitors/hourly/today', {
+    params: {
+      siteId: aesUId
+    }
+  })
+    .then(response => {
+      dispatch(saveRepeatVisitorsHourlyToday(response.data))
+    })
+    .catch(error => {
+      console.log(error)
+    })
+}
+
+export const getKpiSummarToday = () => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+
+  apiClientPresence.get('/api/presence/v1/kpisummary/today', {
+    params: {
+      siteId: aesUId,
+    }
+  })
+    .then(response => {
+      dispatch(saveKpiSummarToday(response.data))
+    })
+    .catch(error => {
+      console.log(error)
+    })
+}
+
 export default createReducer(
   {
     [saveOnlineUsers]: (state, onlineUsers) => ({
@@ -163,6 +203,14 @@ export default createReducer(
     [saveSelectedMenuItem]: (state, selectedMenuItem) => ({
       ...state,
       selectedMenuItem,
+    }),
+    [saveRepeatVisitorsHourlyToday]: (state, repeatVisitorsHourlyToday) => ({
+      ...state,
+      repeatVisitorsHourlyToday,
+    }),
+    [saveKpiSummarToday]: (state, kpiSummarToday) => ({
+      ...state,
+      kpiSummarToday,
     })
   },
   ciscoInitialState
