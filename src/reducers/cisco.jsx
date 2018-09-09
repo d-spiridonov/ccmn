@@ -157,8 +157,18 @@ export const getConnectedDevicesFromCurrentFloor = ({ floor, numberOfConnected, 
 
 // I'll not store this data in redux as it's used only by the maps component
 export const getClientsHistory = ({
-  fromTime, toTime
-}) => dispatch => apiClientCMX.get(`/api/location/v1/history/clients?locatedAfterTime=${fromTime}&locatedBeforeTime=${toTime}`)
+  fromDate, toDate, floor
+}) => dispatch => new Promise((resolve, reject) => {
+  let devices = []
+  apiClientCMX.get(`/api/location/v1/history/clients?locatedAfterTime=${fromDate}&locatedBeforeTime=${toDate}`).then(res => {
+    devices = res.data
+    const devicesFilteredByFloor = devices.filter(device => isMacFloorSelected(floor, device.mapInfo.mapHierarchyString.toLowerCase()))
+    resolve(devicesFilteredByFloor)
+  })
+    .catch(err => {
+      reject(err)
+    })
+})
 
 export default createReducer(
   {

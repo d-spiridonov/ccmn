@@ -2,11 +2,11 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, getClientsHistory, DatePicker
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, DatePicker
 } from 'antd'
 import moment from 'moment'
 import {
-  getAllMaps, getAllClients, getSelectedMac, getConnectedDevicesFromCurrentFloor
+  getAllMaps, getAllClients, getSelectedMac, getConnectedDevicesFromCurrentFloor, getClientsHistory
 } from '../../reducers/cisco'
 import './map.css'
 import HeatMapControls from './heatMapControls'
@@ -56,6 +56,7 @@ class FloorMap extends Component {
     currentTime: moment(),
     showHeatMap: false,
     loadingClientHistory: false,
+    heatMap: null,
     heatMapFromDate: moment().startOf('day'),
     heatMapToDate: moment().endOf('day'),
   }
@@ -92,6 +93,8 @@ class FloorMap extends Component {
       connectedDevicesFromCurrentFloor,
       currentFloorNumber: e.target.value,
       currentFloor: this.getFloorByFloorNumber(e.target.value),
+      heatMap: null,
+      showHeatMap: false,
     })
   }
 
@@ -170,7 +173,7 @@ class FloorMap extends Component {
           width: 15,
           height: 15,
           borderRadius: 25,
-          opacity: 0.1,
+          opacity: 0.2,
           position: 'absolute',
           background: 'pink',
           borderStyle: 'solid',
@@ -239,42 +242,24 @@ class FloorMap extends Component {
       const fromDate = this.state.heatMapFromDate.valueOf()
       const toDate = this.state.heatMapToDate.valueOf()
       this.setState({
-        loadingClientHistory: true
+        loadingClientHistory: true,
+        showHeatMap: true,
       })
-      this.props.getClientsHistory().then(res => {
-        console.log(res)
+      this.props.getClientsHistory({ fromDate, toDate, floor: this.state.currentFloorNumber }).then(res => {
         this.setState({
-          loadingClientHistory: false
+          heatMap: res,
+          loadingClientHistory: false,
         })
+      })
+    } else {
+      this.setState({
+        showHeatMap: false,
+        heatMap: null
       })
     }
   }
 
-  handleHeatMapDateSliderChange = e => {
-    this.setState(prevState => {
-      const heatMapToDate = prevState.heatMapToDate
-      const newToDate = moment().add(-e, 'days').hour(prevState.heatMapToDate.get('hour')).startOf('hour')
-      heatMapToDate.set(newToDate.toObject())
-      return {
-        heatMapToDate
-      }
-    })
-  }
-
-  // here both from and to date should be overwritten by the selected time-period
-  handleHeatMapTimeSliderChange = e => {
-    this.setState(prevState => {
-      const heatMapFromDate = prevState.heatMapFromDate.hour(moment().startOf('day').add(e[0], 'hour').get('hour'))
-      const heatMapToDate = prevState.heatMapToDate.hour(moment().startOf('day').add(e[1], 'hour').get('hour'))
-      return {
-        heatMapFromDate,
-        heatMapToDate
-      }
-    })
-  }
-
   handleStartDateChange = heatMapFromDate => {
-    console.log(heatMapFromDate)
     this.setState({
       heatMapFromDate
     })
@@ -290,7 +275,7 @@ class FloorMap extends Component {
     const {
       currentFloor, selectedMac, macAddress, showMacCoordinates, currentFloorNumber,
       connectedDevicesFromCurrentFloor, showConnectedDevicesFromCurrentFloor, currentTime,
-      heatMapFromDate, heatMapToDate
+      heatMapFromDate, heatMapToDate, heatMap, showHeatMap, loadingClientHistory
     } = this.state
     const { activeMacAddresses, floorMaps } = this.props
 
@@ -325,11 +310,13 @@ class FloorMap extends Component {
             max={this.getMaxNumberOfDevicesOnCurrentFloor()}
           />
           <HeatMapControls
+            checked={showHeatMap}
             handleCheckboxClick={this.handleHeatMapCheckboxClick}
             handleStartDateChange={this.handleStartDateChange}
             handleEndDateChange={this.handleEndDateChange}
             startDate={heatMapFromDate}
             endDate={heatMapToDate}
+            isLoading={loadingClientHistory}
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
@@ -352,6 +339,9 @@ class FloorMap extends Component {
                   <Popover id={device.macAddress} content={this.content(device.macAddress)} title="Device" trigger="hover">
                     <div key={device.macAddress} id={device.macAddress} style={this.getCircleStyle('green', device.mapCoordinate.x, device.mapCoordinate.y)} />
                   </Popover>
+                ))}
+                {heatMap && heatMap.map((device, index) => (
+                  <div key={device.macAddress + device.changedOn} id={device.macAddress} style={this.getCircleStyle('pink', device.mapCoordinate.x, device.mapCoordinate.y)} />
                 ))}
               </div>
             ) : <Spin size="large" />}
@@ -431,7 +421,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  getClientsHistory: ({ fromTime, toTime }) => dispatch(getClientsHistory({ fromTime, toTime })),
+  getClientsHistory: ({ fromDate, toDate, floor }) => dispatch(getClientsHistory({ fromDate, toDate, floor })),
   getAllMaps: () => dispatch(getAllMaps()),
   getAllClients: () => dispatch(getAllClients()),
   getConnectedDevicesFromCurrentFloor: ({ floor, numberOfConnected, getAll }) => dispatch(getConnectedDevicesFromCurrentFloor({ floor, numberOfConnected, getAll })),
