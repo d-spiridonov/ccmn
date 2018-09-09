@@ -109,6 +109,7 @@ const requestMaps = floorList => dispatch => {
         imageSrcs.push({
           src: `data:;base64,${base64}`,
           floor: (floor || {}).floorNumber,
+          hierarchyName: (floor || {}).hierarchyName,
           width: ((floor || {}).dimension || {}).width,
           // yes, we take length as a height, stupid CISCO API
           height: ((floor || {}).dimension || {}).length,
@@ -133,6 +134,41 @@ export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v
     const activeMacAddresses = response.data.map(macAddress => macAddress.macAddress)
     dispatch(saveActiveMacAddresses(activeMacAddresses))
   })
+
+const isMacFloorSelected = (floor, deviceFloor) => {
+  if ((deviceFloor.includes('1st_floor') && floor == 1) || (deviceFloor.includes('2nd_floor')
+&& floor == 2) || (deviceFloor.includes('3rd_floor') && floor == 3)) return true
+  return false
+}
+
+export const getConnectedDevicesFromCurrentFloor = ({ floor, numberOfConnected, getAll }) => (dispatch, getState) => {
+  const activeClients = getState().cisco.activeClients
+  // slice the array up to number of elements in the array and then filter them according to the floor chosen
+  let returned = 0
+  const devicesOnCurrentFloor = activeClients.filter(client => {
+    if ((returned < numberOfConnected || getAll) && isMacFloorSelected(floor, client.mapInfo.mapHierarchyString)) {
+      returned++
+      return client
+    }
+    return false
+  })
+  return devicesOnCurrentFloor
+}
+
+// I'll not store this data in redux as it's used only by the maps component
+export const getClientsHistory = ({
+  fromDate, toDate, floor
+}) => dispatch => new Promise((resolve, reject) => {
+  let devices = []
+  apiClientCMX.get(`/api/location/v1/history/clients?locatedAfterTime=${fromDate}&locatedBeforeTime=${toDate}`).then(res => {
+    devices = res.data
+    const devicesFilteredByFloor = devices.filter(device => isMacFloorSelected(floor, device.mapInfo.mapHierarchyString.toLowerCase()))
+    resolve(devicesFilteredByFloor)
+  })
+    .catch(err => {
+      reject(err)
+    })
+})
 
 export default createReducer(
   {
