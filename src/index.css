@@ -43,3 +43,10 @@ h2{
   border-top: 1px solid rgba(25, 144, 255, 0.1);
   border-bottom: 1px solid rgba(25, 144, 255, 0.1);  
 }
+
+
+/* DASH BOARD */
+
+.dashboard-container{
+  padding: 30px;
+}

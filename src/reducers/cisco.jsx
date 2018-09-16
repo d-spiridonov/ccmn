@@ -10,7 +10,9 @@ export const saveActiveMacAddresses = createAction('save active mac addresses')
 export const saveSelectedMenuItem = createAction('save selected menu item')
 
 export const saveRepeatVisitorsHourlyToday = createAction('save repeat hourly visitors today')
+
 export const saveKpiSummarToday = createAction('save kpi summary today')
+export const saveDashBoardType = createAction('save dash board type')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -48,11 +50,11 @@ export const ciscoInitialState = {
   activeClients: [],
   activeMacAddresses: [],
   repeatVisitorsHourlyToday: null,
+  repeatVisitorsHourlyTodayTmp: null,
   kpiSummarToday: null,
   dashboardCurrent: 'today',
-  dashboardStartDate: null,
-  dashboardEndDate: null,
-  dashboardListInput: ['today', 'yesterday', '3days']
+  dashboardListInput: ['today', 'yesterday', '3days'],
+  dashBoardType: 'today'
 }
 
 export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/location/v2/clients/count/')
@@ -143,20 +145,27 @@ export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v
     dispatch(saveActiveMacAddresses(activeMacAddresses))
   })
 
-export const getRepeatVisitorsHourlyToday = () => (dispatch, getState) => {
+export const getRepeatVisitorsHourlyToday = (startDate, endDate) => (dispatch, getState) => {
   const aesUId = getState().cisco.aesUId
-  apiClientPresence.get('/api/presence/v1/repeatvisitors/hourly/today', {
-    params: {
-      siteId: aesUId
-    }
-  })
+  let endPoint
+  let params
+  if (!endDate) {
+    endPoint = `/api/presence/v1/repeatvisitors/hourly/${startDate}`
+    params = { params: { siteId: aesUId } }
+  }
+  else {
+    endPoint = '/api/presence/v1/repeatvisitors/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
     .then(response => {
       dispatch(saveRepeatVisitorsHourlyToday(response.data))
     })
     .catch(error => {
-      console.log(error)
     })
 }
+
 
 export const getKpiSummarToday = () => (dispatch, getState) => {
   const aesUId = getState().cisco.aesUId
@@ -170,7 +179,6 @@ export const getKpiSummarToday = () => (dispatch, getState) => {
       dispatch(saveKpiSummarToday(response.data))
     })
     .catch(error => {
-      console.log(error)
     })
 }
 
@@ -211,6 +219,10 @@ export default createReducer(
     [saveKpiSummarToday]: (state, kpiSummarToday) => ({
       ...state,
       kpiSummarToday,
+    }),
+    [saveDashBoardType]: (state, dashBoardType) => ({
+      ...state,
+      dashBoardType,
     })
   },
   ciscoInitialState

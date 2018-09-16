@@ -14,19 +14,33 @@ import { getRepeatVisitorsHourlyToday } from '../../reducers/cisco'
 class RepearVisitors extends Component {
   static propTypes = {
     repeatVisitorsHourlyToday: PropTypes.object,
-    getRepeatVisitorsHourlyToday: PropTypes.func
+    dashBoardType: PropTypes.string,
+    getRepeatVisitorsHourlyToday: PropTypes.func,
   }
 
   componentDidMount() {
     this.props.getRepeatVisitorsHourlyToday()
   }
 
-  renderChart = type => {
-    if (type) return Object.keys(this.props.repeatVisitorsHourlyToday).map(index => this.props.repeatVisitorsHourlyToday[index][type])
-    return Object.keys(this.props.repeatVisitorsHourlyToday).map(hour => {
-      let label = `${parseInt(hour) > 12 ? hour - 12 : hour} ${parseInt(hour) > 12 ? 'pm' : 'am'}`
-      return label
+  renderDaily = (type, data) => {
+    if (type) return Object.keys(data).map(index => {
+      if (data[index]) return data[index][type]
+      return 0
     })
+    return Object.keys(data).map(hour => {
+      if (/^\d+$/.test(hour)) return `${parseInt(hour) > 12 ? hour - 12 : hour} ${parseInt(hour) > 12 ? 'pm' : 'am'}`
+      return hour
+    })
+  }
+
+  renderChart = type => {
+    if (!this.props.repeatVisitorsHourlyToday) return []
+    if (this.props.dashBoardType === '3days' && Object.keys(this.props.repeatVisitorsHourlyToday).length === 3)
+    {
+      // Return concat array for few dates
+      return Object.values(this.props.repeatVisitorsHourlyToday).reduce((a, item) => a.concat(this.renderDaily(type, item)), [])
+    }
+    return this.renderDaily(type, this.props.repeatVisitorsHourlyToday)
   }
 
   render() {
@@ -81,31 +95,23 @@ class RepearVisitors extends Component {
       ]
     }
     return (
-      <Col className="gutter-row" span={20}>
-        <h1>Repeat Visitors</h1>
-        <Content>
-          <h2>Repeat Visitors</h2>
-          <div className="chart-box">
-            <Line data={data} width={100} height={40} />
-          </div>
-        </Content>
-        <Content>
-          <h2>Repeat Visitors</h2>
-          <div className="chart-box">
-            <Line data={data} width={100} height={40} />
-          </div>
-        </Content>
-      </Col>
+      <Content>
+        <h2>Repeat Visitors</h2>
+        <div className="chart-box">
+          <Line data={data} width={100} height={40} />
+        </div>
+      </Content>
     )
   }
 }
 
-const dashboardStateToProps = state => ({
+const repeatVisitorStateToProps = state => ({
   repeatVisitorsHourlyToday: state.cisco.repeatVisitorsHourlyToday,
+  dashBoardType: state.cisco.dashBoardType
 })
 
-const dashboardDispatchToProps = dispatch => ({
-  getRepeatVisitorsHourlyToday: () => dispatch(getRepeatVisitorsHourlyToday()),
+const repeatVisitorDispatchToProps = dispatch => ({
+  getRepeatVisitorsHourlyToday: () => dispatch(getRepeatVisitorsHourlyToday('today')),
 })
 
-export default connect(dashboardStateToProps, dashboardDispatchToProps)(RepearVisitors)
+export default connect(repeatVisitorStateToProps, repeatVisitorDispatchToProps)(RepearVisitors)
