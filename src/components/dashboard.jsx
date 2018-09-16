@@ -8,18 +8,24 @@ import {
 } from 'antd'
 import RepearVisitors from './dashboard/repeatVisitors'
 import Dwell from './dashboard/dwell'
+import Passerby from './dashboard/passerby'
 import KpiSummarToday from './dashboard/kpiSummery'
 
 const { RangePicker } = DatePicker
 const { Header, Content, Footer, } = Layout
 const Option = Select.Option
-import { getRepeatVisitorsHourlyToday, getDwell } from '../reducers/cisco'
+import {
+  getRepeatVisitorsHourlyToday, getDwell, getPsserby, getConnected, getVisitors
+} from '../reducers/cisco'
 
 
 class Dashboard extends Component {
   static propTypes = {
     dashboardListInput: PropTypes.array,
     getRepeatVisitorsHourlyToday: PropTypes.func,
+    getPsserby: PropTypes.func,
+    getConnected: PropTypes.func,
+    getVisitors: PropTypes.func,
     getDwell: PropTypes.func,
   }
 
@@ -41,9 +47,15 @@ class Dashboard extends Component {
     if (dateEnd.diff(dateStart, 'days') === 0) {
       this.props.getDwell('today')
       this.props.getRepeatVisitorsHourlyToday('today')
+      this.props.getPsserby('today')
+      this.props.getConnected('today')
+      this.props.getVisitors('today')
     }
     else {
       this.props.getDwell(dateString[0], dateString[1])
+      this.props.getPsserby(dateString[0], dateString[1])
+      this.props.getConnected(dateString[0], dateString[1])
+      this.props.getVisitors(dateString[0], dateString[1])
       this.props.getRepeatVisitorsHourlyToday(dateString[0], dateString[1])
     }
   }
@@ -51,6 +63,9 @@ class Dashboard extends Component {
   changeDateSelect = (date) => {
     this.props.getRepeatVisitorsHourlyToday(date)
     this.props.getDwell(date)
+    this.props.getPsserby(date)
+    this.props.getConnected(date)
+    this.props.getVisitors(date)
   }
   // For Date Picker
 
@@ -68,7 +83,7 @@ class Dashboard extends Component {
   render() {
     const { dashboardListInput } = this.props
     const { isDisibleSelect } = this.state
-    const ttSelectText = isDisibleSelect ? 'Please, clear date picker' : 'Please, select type'
+    const ttSelectText = isDisibleSelect ? 'Please clear date picker' : 'Please select type'
     const optionItems = dashboardListInput ? dashboardListInput.map((option) => <Option value={option} key={option}>{option}</Option>) : []
 
     return (
@@ -94,6 +109,7 @@ class Dashboard extends Component {
         <Row type="flex" justify="space-around" align="middle" gutter={24}>
           <Col className="gutter-row" span={20}>
             <h1>General Information</h1>
+            <Passerby />
             <RepearVisitors />
             <Dwell />
           </Col>
@@ -109,6 +125,9 @@ const dashboardStateToProps = state => ({
 const dashboardDispatchToProps = dispatch => ({
   getRepeatVisitorsHourlyToday: (startDate, endDate) => dispatch(getRepeatVisitorsHourlyToday(startDate, endDate)),
   getDwell: (startDate, endDate) => dispatch(getDwell(startDate, endDate)),
+  getPsserby: (startDate, endDate) => dispatch(getPsserby(startDate, endDate)),
+  getConnected: (startDate, endDate) => dispatch(getConnected(startDate, endDate)),
+  getVisitors: (startDate, endDate) => dispatch(getVisitors(startDate, endDate))
 })
 
 export default connect(dashboardStateToProps, dashboardDispatchToProps)(Dashboard)

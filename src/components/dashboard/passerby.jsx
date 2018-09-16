@@ -8,23 +8,29 @@ import {
 
 const { Header, Content, Footer, } = Layout
 
-import { getDwell } from '../../reducers/cisco'
+import { getPsserby, getConnected, getVisitors } from '../../reducers/cisco'
 
 
-class Dwell extends Component {
+class Passerby extends Component {
   static propTypes = {
-    dwell: PropTypes.object,
+    connected: PropTypes.object,
+    passerby: PropTypes.object,
+    visitors: PropTypes.object,
     dashBoardType: PropTypes.string,
-    getDwell: PropTypes.func,
+    getPsserby: PropTypes.func,
+    getConnected: PropTypes.func,
+    getVisitors: PropTypes.func
   }
 
   componentDidMount() {
-    this.props.getDwell()
+    this.props.getPsserby()
+    this.props.getConnected()
+    this.props.getVisitors()
   }
 
   renderDaily = (type, data) => {
     if (type) return Object.keys(data).map(index => {
-      if (data[index]) return data[index][type]
+      if (data[index]) return data[index]
       return 0
     })
     return Object.keys(data).map(hour => {
@@ -33,60 +39,45 @@ class Dwell extends Component {
     })
   }
 
-  renderChart = type => {
-    if (!this.props.dwell) return []
-    if (this.props.dashBoardType === '3days' && Object.keys(this.props.dwell).length === 3)
+  renderChart = (type, data) => {
+    if (!data) return []
+    if (this.props.dashBoardType === '3days' && Object.keys(data).length === 3)
     {
       // Return concat array for few dates
-      return Object.values(this.props.dwell).reduce((a, item) => a.concat(this.renderDaily(type, item)), [])
+      return Object.values(data).reduce((a, item) => a.concat(this.renderDaily(type, item)), [])
     }
-    return this.renderDaily(type, this.props.dwell)
+    return this.renderDaily(type, data)
   }
 
   render() {
     const data = {
-      labels: this.renderChart(null),
+      labels: this.renderChart(null, this.props.passerby),
       datasets: [{
-        data: this.renderChart('FIVE_TO_THIRTY_MINUTES'),
-        label: 'FIVE_TO_THIRTY_MINUTES',
-        backgroundColor: 'rgba(53, 162, 235, 1)',
-        borderColor: ['rgba(53, 162, 235, 0.4)'],
-        fill: false
-      },
-      {
-        data: this.renderChart('THIRTY_TO_SIXTY_MINUTES'),
-        label: 'THIRTY_TO_SIXTY_MINUTES',
+        data: this.renderChart('passerby', this.props.passerby),
         backgroundColor: 'rgba(255, 99, 132, 1)',
         borderColor: ['rgba(255,99,132, 0.4)'],
-        fill: false
+        fill: false,
+        label: 'Passerby'
       },
       {
-        data: this.renderChart('ONE_TO_FIVE_HOURS'),
+        data: this.renderChart('connected', this.props.connected),
         backgroundColor: 'rgba(74, 191, 191, 1)',
         borderColor: ['rgba(74, 191, 191, 0.4)'],
-        label: 'ONE_TO_FIVE_HOURS',
-        fill: false
+        fill: false,
+        label: 'Connected'
       },
       {
-        data: this.renderChart('FIVE_TO_EIGHT_HOURS'),
-        label: 'FIVE_TO_EIGHT_HOURS',
-        backgroundColor: 'rgba(255, 206, 86, 1)',
-        borderColor: ['rgba(255, 206, 86, 0.4)'],
-        fill: false
-      },
-      {
-        data: this.renderChart('EIGHT_PLUS_HOURS'),
-        backgroundColor: 'rgba(101, 0, 251, 1)',
-        borderColor: ['rgba(101, 0, 251, 0.4)'],
-
-        label: 'EIGHT_PLUS_HOURS',
-        fill: false
+        data: this.renderChart('connected', this.props.visitors),
+        backgroundColor: 'rgba(53, 162, 235, 1)',
+        borderColor: ['rgba(53, 162, 235, 0.4)'],
+        fill: false,
+        label: 'Visitors'
       }
       ]
     }
     return (
       <Content>
-        <h2> Dwell Time</h2>
+        <h2> Proximity</h2>
         <div className="chart-box">
           <Bar data={data} width={100} height={40} />
         </div>
@@ -95,13 +86,17 @@ class Dwell extends Component {
   }
 }
 
-const dwellToProps = state => ({
-  dwell: state.cisco.dwell,
+const passerbyToProps = state => ({
+  passerby: state.cisco.passerby,
+  connected: state.cisco.connected,
+  visitors: state.cisco.visitors,
   dashBoardType: state.cisco.dashBoardType
 })
 
-const dwellToPropsDispatchToProps = dispatch => ({
-  getDwell: () => dispatch(getDwell('today')),
+const passerbyToPropsDispatchToProps = dispatch => ({
+  getPsserby: () => dispatch(getPsserby('today')),
+  getConnected: () => dispatch(getConnected('today')),
+  getVisitors: () => dispatch(getVisitors('today'))
 })
 
-export default connect(dwellToProps, dwellToPropsDispatchToProps)(Dwell)
+export default connect(passerbyToProps, passerbyToPropsDispatchToProps)(Passerby)

@@ -10,6 +10,10 @@ export const saveActiveMacAddresses = createAction('save active mac addresses')
 export const saveSelectedMenuItem = createAction('save selected menu item')
 export const saveRepeatVisitorsHourlyToday = createAction('save repeat hourly visitors today')
 export const saveDwell = createAction('save dwell')
+export const savePasserby = createAction('save passerby')
+export const saveConnected = createAction('save connected')
+export const saveVisitors = createAction('save visitors')
+
 export const saveKpiSummarToday = createAction('save kpi summary today')
 export const saveDashBoardType = createAction('save dash board type')
 
@@ -50,6 +54,8 @@ export const ciscoInitialState = {
   activeMacAddresses: [],
   repeatVisitorsHourlyToday: null,
   dwell: null,
+  passerby: null,
+  visitors: null,
   repeatVisitorsHourlyTodayTmp: null,
   kpiSummarToday: null,
   dashboardCurrent: 'today',
@@ -179,6 +185,57 @@ export const getDwell = (startDate, endDate) => (dispatch, getState) => {
     })
 }
 
+export const getPsserby = (startDate, endDate) => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  let endPoint = `/api/presence/v1/passerby/hourly/${startDate}`
+  let params = { params: { siteId: aesUId } }
+  if (endDate) {
+    endPoint = '/api/presence/v1/passerby/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
+    .then(response => {
+      dispatch(savePasserby(response.data))
+    })
+    .catch(error => {
+    })
+}
+
+export const getConnected = (startDate, endDate) => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  let endPoint = `/api/presence/v1/connected/hourly/${startDate}`
+  let params = { params: { siteId: aesUId } }
+  if (endDate) {
+    endPoint = '/api/presence/v1/connected/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
+    .then(response => {
+      dispatch(saveConnected(response.data))
+    })
+    .catch(error => {
+    })
+}
+
+export const getVisitors = (startDate, endDate) => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  let endPoint = `/api/presence/v1/visitor/hourly/${startDate}`
+  let params = { params: { siteId: aesUId } }
+  if (endDate) {
+    endPoint = '/api/presence/v1/visitor/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
+    .then(response => {
+      dispatch(saveVisitors(response.data))
+    })
+    .catch(error => {
+    })
+}
+
 export const getKpiSummarToday = () => (dispatch, getState) => {
   const aesUId = getState().cisco.aesUId
 
@@ -231,6 +288,18 @@ export default createReducer(
     [saveDwell]: (state, dwell) => ({
       ...state,
       dwell,
+    }),
+    [savePasserby]: (state, passerby) => ({
+      ...state,
+      passerby,
+    }),
+    [saveConnected]: (state, connected) => ({
+      ...state,
+      connected,
+    }),
+    [saveVisitors]: (state, visitors) => ({
+      ...state,
+      visitors,
     }),
     [saveKpiSummarToday]: (state, kpiSummarToday) => ({
       ...state,
