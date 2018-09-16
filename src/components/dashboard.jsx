@@ -7,18 +7,20 @@ import {
   Layout, Radio, Row, Col, Select, DatePicker, Tooltip
 } from 'antd'
 import RepearVisitors from './dashboard/repeatVisitors'
+import Dwell from './dashboard/dwell'
 import KpiSummarToday from './dashboard/kpiSummery'
 
 const { RangePicker } = DatePicker
 const { Header, Content, Footer, } = Layout
 const Option = Select.Option
-import { getRepeatVisitorsHourlyToday } from '../reducers/cisco'
+import { getRepeatVisitorsHourlyToday, getDwell } from '../reducers/cisco'
 
 
 class Dashboard extends Component {
   static propTypes = {
     dashboardListInput: PropTypes.array,
-    getRepeatVisitorsHourlyToday: PropTypes.func
+    getRepeatVisitorsHourlyToday: PropTypes.func,
+    getDwell: PropTypes.func,
   }
 
   state = {
@@ -35,22 +37,32 @@ class Dashboard extends Component {
   disabledDate = (current) => current > moment().endOf('day')
 
   // Checker fo inpud dates
-  dateCheaker = (dateStart, dateEnd, dateString) => {
-    if (dateEnd.diff(dateStart, 'days') === 0) return this.props.getRepeatVisitorsHourlyToday('today')
-    return this.props.getRepeatVisitorsHourlyToday(dateString[0], dateString[1])
+  dateCheakerRepeat = (dateStart, dateEnd, dateString) => {
+    if (dateEnd.diff(dateStart, 'days') === 0) {
+      this.props.getDwell('today')
+      this.props.getRepeatVisitorsHourlyToday('today')
+    }
+    else {
+      this.props.getDwell(dateString[0], dateString[1])
+      this.props.getRepeatVisitorsHourlyToday(dateString[0], dateString[1])
+    }
   }
 
-  // For Select
-  changeDateSelect = (date, dateString) => this.props.getRepeatVisitorsHourlyToday(date)
-
+  changeDateSelect = (date) => {
+    this.props.getRepeatVisitorsHourlyToday(date)
+    this.props.getDwell(date)
+  }
   // For Date Picker
 
   changeDate = (date, dateString) => {
     if (dateString[0]) {
-      this.dateCheaker(date[0], date[1], dateString)
+      this.dateCheakerRepeat(date[0], date[1], dateString)
+      // this.dateCheakerDewell(date[0], date[1], dateString)
       this.disibleSelect(true)
     }
-    else this.disibleSelect(false)
+    else {
+      this.disibleSelect(false)
+    }
   }
 
   render() {
@@ -83,6 +95,7 @@ class Dashboard extends Component {
           <Col className="gutter-row" span={20}>
             <h1>General Information</h1>
             <RepearVisitors />
+            <Dwell />
           </Col>
         </Row>
       </div>
@@ -95,6 +108,7 @@ const dashboardStateToProps = state => ({
 
 const dashboardDispatchToProps = dispatch => ({
   getRepeatVisitorsHourlyToday: (startDate, endDate) => dispatch(getRepeatVisitorsHourlyToday(startDate, endDate)),
+  getDwell: (startDate, endDate) => dispatch(getDwell(startDate, endDate)),
 })
 
 export default connect(dashboardStateToProps, dashboardDispatchToProps)(Dashboard)
