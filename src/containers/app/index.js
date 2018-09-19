@@ -15,6 +15,7 @@ import { logout } from '../../reducers/auth'
 import Logout from './logout'
 import Nav from '../../components/nav/navToolBar'
 import FloorMap from '../../components/maps/map'
+import Guide from '../../components/guide'
 
 const App = () => (
   <PersistGate loading={null} persistor={persistor}>
@@ -25,6 +26,7 @@ const App = () => (
       <Nav>
         <Route exact path="/dashboard/dashboard" component={Dashboard} />
         <Route exact path="/dashboard/map" component={FloorMap} />
+        <Route exact path="/dashboard/guide" component={Guide} />
       </Nav>
     </Switch>
   </PersistGate>

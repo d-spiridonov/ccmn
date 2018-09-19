@@ -1,4 +1,4 @@
-import { createReducer, createAction } from 'redux-act'
+import { createReducer, createAction, disbatch } from 'redux-act'
 import axios from 'axios'
 
 export const saveOnlineUsers = createAction('save online users')
@@ -8,6 +8,14 @@ export const saveFloorImages = createAction('save floor image')
 export const saveActiveClients = createAction('save active clients')
 export const saveActiveMacAddresses = createAction('save active mac addresses')
 export const saveSelectedMenuItem = createAction('save selected menu item')
+export const saveRepeatVisitorsHourlyToday = createAction('save repeat hourly visitors today')
+export const saveDwell = createAction('save dwell')
+export const savePasserby = createAction('save passerby')
+export const saveConnected = createAction('save connected')
+export const saveVisitors = createAction('save visitors')
+
+export const saveKpiSummarToday = createAction('save kpi summary today')
+export const saveDashBoardType = createAction('save dash board type')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -44,6 +52,15 @@ export const ciscoInitialState = {
   floorImages: null,
   activeClients: [],
   activeMacAddresses: [],
+  repeatVisitorsHourlyToday: null,
+  dwell: null,
+  passerby: null,
+  visitors: null,
+  repeatVisitorsHourlyTodayTmp: null,
+  kpiSummarToday: null,
+  dashboardCurrent: 'today',
+  dashboardListInput: ['today', 'yesterday', '3days'],
+  dashBoardType: 'today'
 }
 
 export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/location/v2/clients/count/')
@@ -135,6 +152,105 @@ export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v
     dispatch(saveActiveMacAddresses(activeMacAddresses))
   })
 
+export const getRepeatVisitorsHourlyToday = (startDate, endDate) => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  let endPoint = `/api/presence/v1/repeatvisitors/hourly/${startDate}`
+  let params = { params: { siteId: aesUId } }
+  if (endDate) {
+    endPoint = '/api/presence/v1/repeatvisitors/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
+    .then(response => {
+      dispatch(saveRepeatVisitorsHourlyToday(response.data))
+    })
+    .catch(error => {
+    })
+}
+
+export const getDwell = (startDate, endDate) => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  let endPoint = `/api/presence/v1/dwell/hourly/${startDate}`
+  let params = { params: { siteId: aesUId } }
+  if (endDate) {
+    endPoint = '/api/presence/v1/dwell/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
+    .then(response => {
+      dispatch(saveDwell(response.data))
+    })
+    .catch(error => {
+    })
+}
+
+export const getPsserby = (startDate, endDate) => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  let endPoint = `/api/presence/v1/passerby/hourly/${startDate}`
+  let params = { params: { siteId: aesUId } }
+  if (endDate) {
+    endPoint = '/api/presence/v1/passerby/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
+    .then(response => {
+      dispatch(savePasserby(response.data))
+    })
+    .catch(error => {
+    })
+}
+
+export const getConnected = (startDate, endDate) => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  let endPoint = `/api/presence/v1/connected/hourly/${startDate}`
+  let params = { params: { siteId: aesUId } }
+  if (endDate) {
+    endPoint = '/api/presence/v1/connected/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
+    .then(response => {
+      dispatch(saveConnected(response.data))
+    })
+    .catch(error => {
+    })
+}
+
+export const getVisitors = (startDate, endDate) => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+  let endPoint = `/api/presence/v1/visitor/hourly/${startDate}`
+  let params = { params: { siteId: aesUId } }
+  if (endDate) {
+    endPoint = '/api/presence/v1/visitor/daily'
+    params = { params: { siteId: aesUId, startDate, endDate } }
+  }
+  dispatch(saveDashBoardType(startDate))
+  apiClientPresence.get(endPoint, params)
+    .then(response => {
+      dispatch(saveVisitors(response.data))
+    })
+    .catch(error => {
+    })
+}
+
+export const getKpiSummarToday = () => (dispatch, getState) => {
+  const aesUId = getState().cisco.aesUId
+
+  apiClientPresence.get('/api/presence/v1/kpisummary/today', {
+    params: {
+      siteId: aesUId,
+    }
+  })
+    .then(response => {
+      dispatch(saveKpiSummarToday(response.data))
+    })
+    .catch(error => {
+    })
+}
 const isMacFloorSelected = (floor, deviceFloor) => {
   if ((deviceFloor.includes('1st_floor') && floor == 1) || (deviceFloor.includes('2nd_floor')
 && floor == 2) || (deviceFloor.includes('3rd_floor') && floor == 3)) return true
@@ -199,6 +315,34 @@ export default createReducer(
     [saveSelectedMenuItem]: (state, selectedMenuItem) => ({
       ...state,
       selectedMenuItem,
+    }),
+    [saveRepeatVisitorsHourlyToday]: (state, repeatVisitorsHourlyToday) => ({
+      ...state,
+      repeatVisitorsHourlyToday,
+    }),
+    [saveDwell]: (state, dwell) => ({
+      ...state,
+      dwell,
+    }),
+    [savePasserby]: (state, passerby) => ({
+      ...state,
+      passerby,
+    }),
+    [saveConnected]: (state, connected) => ({
+      ...state,
+      connected,
+    }),
+    [saveVisitors]: (state, visitors) => ({
+      ...state,
+      visitors,
+    }),
+    [saveKpiSummarToday]: (state, kpiSummarToday) => ({
+      ...state,
+      kpiSummarToday,
+    }),
+    [saveDashBoardType]: (state, dashBoardType) => ({
+      ...state,
+      dashBoardType,
     })
   },
   ciscoInitialState

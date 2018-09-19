@@ -102,6 +102,7 @@ class NavToolBar extends React.Component {
               selectedKeys={[selectedMenuItem]}
               onSelect={this.handleSelect}
             >
+              <Menu.Item key="guide"><Icon type="info-circle" theme="outlined" />Guide</Menu.Item>
               <Menu.Item key="dashboard"><Icon type="dashboard" />Dashboard</Menu.Item>
               <Menu.Item key="2"><Icon type="pie-chart" />Metrics</Menu.Item>
               <Menu.Item key="map"><Icon type="compass" />Maps</Menu.Item>
