@@ -16,6 +16,7 @@ export const saveVisitors = createAction('save visitors')
 
 export const saveKpiSummarToday = createAction('save kpi summary today')
 export const saveDashBoardType = createAction('save dash board type')
+export const saveNewActiveDevices = createAction('save new active devices')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -53,6 +54,7 @@ export const ciscoInitialState = {
   activeClients: [],
   activeMacAddresses: [],
   repeatVisitorsHourlyToday: null,
+  newActiveDevices: [],
   dwell: null,
   passerby: null,
   visitors: null,
@@ -145,12 +147,21 @@ export const getAllMaps = () => dispatch => apiClientCMX.get(
     dispatch(requestMaps(filteredFloorList))
   })
 
+// filter out new devices
+const getNewDevices = newActiveDevices => (dispatch, getState) => {
+  const oldActiveDevices = getState().cisco.activeMacAddresses.map(macAddress => macAddress.macAddress)
+  const newDevices = newActiveDevices.filter(newDevice => !oldActiveDevices.includes(newDevice.macAddress))
+  dispatch(saveNewActiveDevices(newDevices))
+}
+
 export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v2/clients/')
   .then(response => {
     dispatch(saveActiveClients(response.data))
-    const activeMacAddresses = response.data.map(macAddress => macAddress.macAddress)
+    const activeMacAddresses = response.data
+    dispatch(getNewDevices(activeMacAddresses))
     dispatch(saveActiveMacAddresses(activeMacAddresses))
   })
+
 
 export const getRepeatVisitorsHourlyToday = (startDate, endDate) => (dispatch, getState) => {
   const aesUId = getState().cisco.aesUId
@@ -343,6 +354,10 @@ export default createReducer(
     [saveDashBoardType]: (state, dashBoardType) => ({
       ...state,
       dashBoardType,
+    }),
+    [saveNewActiveDevices]: (state, newActiveDevices) => ({
+      ...state,
+      newActiveDevices,
     })
   },
   ciscoInitialState
