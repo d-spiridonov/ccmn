@@ -188,7 +188,7 @@ class FloorMap extends Component {
           width: 15,
           height: 15,
           borderRadius: 25,
-          opacity: 0.7,
+          opacity: 0.9,
           position: 'absolute',
           background: 'green',
           borderStyle: 'solid',
@@ -395,8 +395,8 @@ class FloorMap extends Component {
 
 const ShowDeviceNotifications = ({ showDeviceNotifications, handleDeviceNotifications }) => (
   <div id="deviceNotificationsWrapper">
-    <Switch checked={showDeviceNotifications} onChange={handleDeviceNotifications} />
-    <div>Show device notifications</div>
+    <Switch size="small" checked={showDeviceNotifications} onChange={handleDeviceNotifications} />
+    <div>Show Device Notifications</div>
   </div>
 )
 
@@ -408,15 +408,18 @@ ShowDeviceNotifications.propTypes = {
 const CountConnected = ({
   handleCheckboxClick, handleSliderChange, max
 }) => (
-  <div style={{ width: 250, marginTop: 50 }}>
-    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-      <Checkbox onClick={handleCheckboxClick} />
+  <div style={{ width: 250 }}>
+    <div style={{
+      display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'
+    }}
+    >
+      <Switch size="small" onChange={handleCheckboxClick} />
       <span>Show Connected Devices</span> <div id="greenCircle" />
     </div>
     <Slider defaultValue={5} max={max} min={1} onChange={handleSliderChange} />
     <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
       <span>
-    1
+        {max > 0 ? 1 : 0}
       </span>
       <span>
         Devices

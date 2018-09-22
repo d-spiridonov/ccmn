@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { DatePicker, Checkbox, Spin } from 'antd'
+import { DatePicker, Switch, Spin } from 'antd'
 import moment from 'moment'
 
 const styles = {
@@ -99,15 +99,16 @@ class HeatMap extends Component {
         } = this.props
         const { startValue, endValue, endOpen } = this.state
         return (
-          <div style={{ width: 250, marginTop: 50 }}>
+          <div style={{ width: 250, marginTop: 20 }}>
             <div style={{
-              display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10
+              display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10, justifyContent: 'space-between'
             }}
             >
-              <Checkbox checked={checked} onClick={handleCheckboxClick} />
+              <Switch size="small" checked={checked} onChange={handleCheckboxClick} />
               <span>Show Activity</span> {isLoading ? <Spin /> : <div style={styles.pinkCircle} />}
             </div>
             <div>
+              <div style={{ marginBottom: 10, textAlign: 'center' }}>Please select time-frame</div>
               <DatePicker
                 style={{ width: '100%' }}
                 disabledDate={this.disabledStartDate}
