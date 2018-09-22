@@ -2,3 +2,21 @@
     color: #48b4e6;
     font-weight: bold;
 }
+
+.radioButton {
+    width: 100%;
+}
+
+#greenCircle {
+    width: 15px;
+    height: 15px;
+    border-radius: 25px;
+    background: green;
+}
+
+#deviceNotificationsWrapper {
+    margin: 40px 0px; 
+    display: flex; 
+    width: 240px;
+    justify-content: space-between;
+}

@@ -16,21 +16,6 @@ const Search = Input.Search
 // refresh interval for doing a request to get all clients/interval to update active clients on the floor
 const refreshInterval = 10000
 
-const styles = {
-  greenCircle: {
-    width: 15,
-    height: 15,
-    borderRadius: 25,
-    background: 'green',
-  },
-  pinkCircle: {
-    width: 15,
-    height: 15,
-    borderRadius: 25,
-    background: 'pink',
-  }
-}
-
 class FloorMap extends Component {
   static propTypes = {
     getAllMaps: PropTypes.func.isRequired,
@@ -61,6 +46,7 @@ class FloorMap extends Component {
     heatMapToDate: moment().endOf('day'),
     newActiveDevices: [],
     floorMaps: [],
+    showDeviceNotifications: true,
   }
 
   requestNewClients = () => {
@@ -74,7 +60,7 @@ class FloorMap extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if ((this.state.newActiveDevices.length && this.state.newActiveDevices !== prevState.newActiveDevices)) {
+    if (this.state.showDeviceNotifications && this.state.newActiveDevices.length && this.state.newActiveDevices !== prevState.newActiveDevices) {
       this.newDeviceNotification(this.state.newActiveDevices)
     }
   }
@@ -313,11 +299,17 @@ class FloorMap extends Component {
     })
   }
 
+  handleDeviceNotifications = event => {
+    this.setState({
+      showDeviceNotifications: event
+    })
+  }
+
   render() {
     const {
       currentFloor, selectedMac, macAddress, showMacCoordinates, currentFloorNumber,
       connectedDevicesFromCurrentFloor, showConnectedDevicesFromCurrentFloor, currentTime,
-      heatMapFromDate, heatMapToDate, heatMap, showHeatMap, loadingClientHistory
+      heatMapFromDate, heatMapToDate, heatMap, showHeatMap, loadingClientHistory, showDeviceNotifications
     } = this.state
     const { activeMacAddresses, floorMaps } = this.props
 
@@ -328,11 +320,11 @@ class FloorMap extends Component {
     return ( // TODO: refactor to smaller components
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ width: 232, flexDirection: 'column' }}>
+          <div style={{ width: 250, flexDirection: 'column' }}>
             <Radio.Group style={{ display: 'flex', flexDirection: 'row' }} value={currentFloorNumber} onChange={this.handleFloorChange}>
-              <Radio.Button value={1}>Floor 1</Radio.Button>
-              <Radio.Button value={2}>Floor 2</Radio.Button>
-              <Radio.Button value={3}>Floor 3</Radio.Button>
+              <Radio.Button className="radioButton" value={1}>Floor 1</Radio.Button>
+              <Radio.Button className="radioButton" value={2}>Floor 2</Radio.Button>
+              <Radio.Button className="radioButton" value={3}>Floor 3</Radio.Button>
             </Radio.Group>
             <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
               <AutoComplete
@@ -346,10 +338,13 @@ class FloorMap extends Component {
               <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
             </div>
           </div>
+          <ShowDeviceNotifications showDeviceNotifications={showDeviceNotifications} handleDeviceNotifications={this.handleDeviceNotifications} />
           <CountConnected
             handleCheckboxClick={this.handleCountConnectedCheckboxClick}
             handleSliderChange={this.handleConnectedDevicesSliderChange}
             max={this.getMaxNumberOfDevicesOnCurrentFloor()}
+            showDeviceNotifications={showDeviceNotifications}
+            handleDeviceNotifications={this.handleDeviceNotifications}
           />
           <HeatMapControls
             checked={showHeatMap}
@@ -398,13 +393,25 @@ class FloorMap extends Component {
   }
 }
 
+const ShowDeviceNotifications = ({ showDeviceNotifications, handleDeviceNotifications }) => (
+  <div id="deviceNotificationsWrapper">
+    <Switch checked={showDeviceNotifications} onChange={handleDeviceNotifications} />
+    <div>Show device notifications</div>
+  </div>
+)
+
+ShowDeviceNotifications.propTypes = {
+  showDeviceNotifications: PropTypes.bool.isRequired,
+  handleDeviceNotifications: PropTypes.func.isRequired,
+}
+
 const CountConnected = ({
-  handleCheckboxClick, handleSliderChange, max,
+  handleCheckboxClick, handleSliderChange, max
 }) => (
   <div style={{ width: 250, marginTop: 50 }}>
     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <Checkbox onClick={handleCheckboxClick} />
-      <span>Show Connected Devices</span> <div style={styles.greenCircle} />
+      <span>Show Connected Devices</span> <div id="greenCircle" />
     </div>
     <Slider defaultValue={5} max={max} min={1} onChange={handleSliderChange} />
     <div style={{ width: '100%', justifyContent: 'space-between', display: 'flex' }}>
