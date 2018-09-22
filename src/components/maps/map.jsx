@@ -94,10 +94,16 @@ class FloorMap extends Component {
     newActiveDevices.forEach(device => {
       const manufacturer = device.manufacturer ? device.manufacturer : 'unknown'
       const floor = this.getFloorName(this.getMacFloor(device))
+      const btn = (
+        <Button type="primary" size="small" onClick={() => this.handleMacSelect(device.macAddress)}>
+          Show device
+        </Button>
+      )
       notification.open({
         message: 'New Device Connected',
         description: `Device: ${device.macAddress}, Manufacturer: ${manufacturer}, has coonnected on the ${floor} floor`,
-        icon: manufacturer == 'Apple' ? <Icon type="apple" theme="outlined" /> : <Icon type="wifi" theme="outlined" />
+        icon: manufacturer == 'Apple' ? <Icon type="apple" theme="outlined" /> : <Icon type="wifi" theme="outlined" />,
+        btn,
       })
     })
   };
@@ -141,7 +147,7 @@ class FloorMap extends Component {
     return 3
   }
 
-  hangleMacSelect = macAddress => {
+  handleMacSelect = macAddress => {
     const selectedMac = this.props.getSelectedMac(macAddress)
     if (!selectedMac) return
     const floorString = selectedMac.mapInfo.mapHierarchyString
@@ -333,7 +339,7 @@ class FloorMap extends Component {
                 dataSource={macAddresses}
                 value={macAddress}
                 onChange={this.handleMacChange}
-                onSelect={this.hangleMacSelect}
+                onSelect={this.handleMacSelect}
                 placeholder="Enter mac address to search"
                 filterOption
               />
