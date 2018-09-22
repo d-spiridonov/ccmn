@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, DatePicker
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, DatePicker, notification
 } from 'antd'
 import moment from 'moment'
 import {
@@ -59,6 +59,8 @@ class FloorMap extends Component {
     heatMap: null,
     heatMapFromDate: moment().startOf('day'),
     heatMapToDate: moment().endOf('day'),
+    newActiveDevices: [],
+    floorMaps: [],
   }
 
   requestNewClients = () => {
@@ -71,13 +73,35 @@ class FloorMap extends Component {
     this.requestNewClientsInterval = setInterval(this.requestNewClients, refreshInterval)
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if ((this.state.newActiveDevices.length && this.state.newActiveDevices !== prevState.newActiveDevices)) {
+      this.newDeviceNotification(this.state.newActiveDevices)
+    }
+  }
+
+  newDeviceNotification = newActiveDevices => {
+    newActiveDevices.forEach(device => {
+      const manufacturer = device.manufacturer ? device.manufacturer : 'unknown'
+      notification.open({
+        message: 'New Device Connected',
+        description: `Device: ${device.macAddress}, Manufacturer: ${manufacturer}, has coonnected on the ${this.getMacFloor(device)} floor`,
+        icon: manufacturer == 'Apple' ? <Icon type="apple" theme="outlined" /> : <Icon type="wifi" theme="outlined" />
+      })
+    })
+  };
+
   // load the 1st floor image when the image are loaded for the first time
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.floorMaps) {
-      const currentFloor = nextProps.floorMaps.find(floorMap => floorMap.floor == prevState.currentFloorNumber)
-      return { currentFloor }
+    if (nextProps.floorMaps.length && nextProps.floorMaps !== prevState.floorMaps) {
+      let currentFloor
+      if (!prevState.currentFloor) {
+        currentFloor = nextProps.floorMaps.find(floorMap => floorMap.floor == prevState.currentFloorNumber)
+        return { floorMaps: nextProps.floorMaps, currentFloor }
+      }
     }
-    return null
+    else if (nextProps.newActiveDevices != prevState.newActiveDevices) {
+      return { newActiveDevices: nextProps.newActiveDevices }
+    }
   }
 
   componentWillUnmount() {
@@ -281,7 +305,7 @@ class FloorMap extends Component {
 
     const mapHeight = currentFloor ? currentFloor.height : 0
     const mapWidth = currentFloor ? currentFloor.width : 0
-
+    const macAddresses = activeMacAddresses ? activeMacAddresses.map(macAddress => macAddress.macAddress) : []
 
     return ( // TODO: refactor to smaller components
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -294,7 +318,7 @@ class FloorMap extends Component {
             </Radio.Group>
             <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
               <AutoComplete
-                dataSource={activeMacAddresses}
+                dataSource={macAddresses}
                 value={macAddress}
                 onChange={this.handleMacChange}
                 onSelect={this.hangleMacSelect}
@@ -370,7 +394,7 @@ const CountConnected = ({
     1
       </span>
       <span>
-      Devices
+        Devices
       </span>
       <span>
         {max}
@@ -418,6 +442,7 @@ MacData.propTypes = {
 const mapStateToProps = state => ({
   floorMaps: state.cisco.floorImages,
   activeMacAddresses: state.cisco.activeMacAddresses,
+  newActiveDevices: state.cisco.newActiveDevices,
 })
 
 const mapDispatchToProps = dispatch => ({
