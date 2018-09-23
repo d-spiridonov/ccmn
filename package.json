@@ -70,6 +70,7 @@
     "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
     "style-loader": "^0.22.1",
+    "timeseries-analysis": "^1.0.12",
     "webpack": "^4.17.1",
     "webpack-bundle-tracker": "^0.3.0",
     "webpack-cli": "^3.1.0",

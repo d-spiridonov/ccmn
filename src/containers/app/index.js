@@ -16,6 +16,7 @@ import Logout from './logout'
 import Nav from '../../components/nav/navToolBar'
 import FloorMap from '../../components/maps/map'
 import Guide from '../../components/guide'
+import Forecast from '../../components/forecast'
 
 const App = () => (
   <PersistGate loading={null} persistor={persistor}>
@@ -27,6 +28,7 @@ const App = () => (
         <AuthenticatedRoute exact path="/dashboard/dashboard" component={Dashboard} />
         <AuthenticatedRoute exact path="/dashboard/map" component={FloorMap} />
         <AuthenticatedRoute exact path="/dashboard/guide" component={Guide} />
+        <AuthenticatedRoute exact path="/dashboard/forecast" component={Forecast} />
       </Nav>
     </Switch>
   </PersistGate>

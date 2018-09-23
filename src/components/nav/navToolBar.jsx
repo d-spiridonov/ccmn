@@ -134,7 +134,7 @@ class NavToolBar extends React.Component {
               <Menu.Item key="guide"><Icon type="info-circle" theme="outlined" />Guide</Menu.Item>
               <Menu.Item key="dashboard"><Icon type="dashboard" />Dashboard</Menu.Item>
               <Menu.Item key="map"><Icon type="compass" />Maps</Menu.Item>
-              <Menu.Item key="4"><Icon type="area-chart" />Analytics</Menu.Item>
+              <Menu.Item key="forecast"><Icon type="area-chart" />Forecast</Menu.Item>
             </Menu>
           </Sider>
           <Layout>
