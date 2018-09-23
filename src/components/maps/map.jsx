@@ -25,6 +25,7 @@ class FloorMap extends Component {
     getSelectedMac: PropTypes.func.isRequired,
     getConnectedDevicesFromCurrentFloor: PropTypes.func.isRequired,
     getClientsHistory: PropTypes.func.isRequired,
+    userDevice: PropTypes.object,
   }
 
   state = {
@@ -332,7 +333,7 @@ class FloorMap extends Component {
                 value={macAddress}
                 onChange={this.handleMacChange}
                 onSelect={this.handleMacSelect}
-                placeholder="Enter mac address to search"
+                placeholder="Enter MAC address to search"
                 filterOption
               />
               <Button style={{ width: '100%' }} onClick={this.clearMacAddress}>Clear</Button>
@@ -355,6 +356,7 @@ class FloorMap extends Component {
             endDate={heatMapToDate}
             isLoading={loadingClientHistory}
           />
+          <Button style={{ marginTop: 20, width: '100%' }} type="primary" disabled={!this.props.userDevice} onClick={() => this.handleMacSelect(this.props.userDevice.macAddress)}>Find me</Button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginRight: 50 }}>
@@ -471,6 +473,7 @@ const mapStateToProps = state => ({
   floorMaps: state.cisco.floorImages,
   activeMacAddresses: state.cisco.activeMacAddresses,
   newActiveDevices: state.cisco.newActiveDevices,
+  userDevice: state.auth.userDevice,
 })
 
 const mapDispatchToProps = dispatch => ({

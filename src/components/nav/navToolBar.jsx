@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import {
-  Layout, Menu, Breadcrumb, Icon, Das
+  Layout, Menu, Breadcrumb, Icon, Das, message
 } from 'antd'
 import { connect } from 'react-redux'
 import { dispatch } from 'redux-act'
 import moment from 'moment'
 import { push } from 'react-router-redux'
+import qs from 'query-string'
 import {
   getNumberOfOnlineUsers,
   getCountOfVisitorsToday,
@@ -34,6 +35,8 @@ class NavToolBar extends React.Component {
     push: PropTypes.func.isRequired,
     selectedMenuItem: PropTypes.string.isRequired,
     saveSelectedMenuItem: PropTypes.func.isRequired,
+    location: PropTypes.object,
+    userDevice: PropTypes.object,
   }
 
   toggle = () => {
@@ -53,6 +56,8 @@ class NavToolBar extends React.Component {
   }
 
   componentDidMount() {
+    const newLogin = qs.parse(this.props.location.search, { arrayFormat: 'bracket' }).login
+    if (newLogin) this.showSuccessMessage(newLogin)
     this.handleSelect({ key: this.props.selectedMenuItem })
     this.props.getCountOfVisitorsToday()
     this.interval = setInterval(this.setDateAndTime, 1000)
@@ -64,6 +69,21 @@ class NavToolBar extends React.Component {
     clearInterval(this.devicesConnectedInterval)
   }
 
+  getMacFloor = mac => {
+    const floorString = mac.mapInfo.mapHierarchyString
+    if (floorString.includes('1st_floor')) return '1st floor'
+    if (floorString.includes('2nd_floor')) return '2nd floor'
+    return '3rd floor'
+  }
+
+  showSuccessMessage = login => {
+    if (login == 'macAddress' && this.props.userDevice) {
+      const macFloor = this.getMacFloor(this.props.userDevice)
+      message.success(`Welcome, ${this.props.userDevice.macAddress}. We are glad to see you on the ${macFloor}!`)
+    } else {
+      message.success('Welcome, Anonymous!')
+    }
+  }
 
   handleSelect = (event) => {
     this.props.saveSelectedMenuItem(event.key)
@@ -126,6 +146,7 @@ const mapStateToProps = state => ({
   onlineUsers: state.cisco.onlineUsers,
   visitorsToday: state.cisco.visitorsToday,
   selectedMenuItem: state.cisco.selectedMenuItem,
+  userDevice: state.auth.userDevice,
 })
 
 const mapDispatchToProps = dispatch => ({

@@ -8,12 +8,14 @@ export const setLoggedIn = createAction('set if user is logged in')
 export const setEmailAddress = createAction('set current user email address')
 export const saveToken = createAction('store access and refresh token')
 export const clearToken = createAction('remove all authentication information')
+export const saveUserMacAddress = createAction('save my mac address')
 
 export const authInitialState = {
   isLoggedIn: false,
   username: '',
   me: {},
   token: {},
+  userDevice: null,
 }
 
 export const signup = params => dispatch => axios
@@ -162,6 +164,14 @@ export default createReducer(
       ...state,
       isLoggedIn,
       isAuthenticating: false,
+    }),
+
+    /**
+     * @event saveUserMacAddress - saves user's entered MAC address upon successful login
+     */
+    [saveUserMacAddress]: (state, userDevice) => ({
+      ...state,
+      userDevice,
     }),
 
     /**
