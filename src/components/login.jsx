@@ -141,20 +141,21 @@ class Login extends React.Component {
               placeholder="MAC address"
               className={macAddressError ? 'error' : null}
             />
-            <Button
-              style={styles.buttons}
-              onClick={this.handleLoginByMacAddress}
-              type="primary"
-            >
+            <div style={{ display: 'flex', flexDirection: 'column', width: 180 }}>
+              <Button
+                style={styles.buttons}
+                onClick={this.handleLoginByMacAddress}
+                type="primary"
+              >
               Login By MAC Address
-            </Button>
-            <Button
-              onClick={this.handleAnonymousLogin}
-              style={styles.buttons}
-              type="primary"
-            >
+              </Button>
+              <Button
+                onClick={this.handleAnonymousLogin}
+                style={styles.buttons}
+              >
               Login Anonymously
-            </Button>
+              </Button>
+            </div>
           </Form>
         </Card>
       </div>
