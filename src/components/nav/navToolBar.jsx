@@ -53,6 +53,7 @@ class NavToolBar extends React.Component {
   }
 
   componentDidMount() {
+    this.handleSelect({ key: this.props.selectedMenuItem })
     this.props.getCountOfVisitorsToday()
     this.interval = setInterval(this.setDateAndTime, 1000)
     this.devicesConnectedInterval = setInterval(this.getTotalDevicesConnected, 10000)
@@ -74,7 +75,6 @@ class NavToolBar extends React.Component {
       children, onlineUsers, visitorsToday, selectedMenuItem
     } = this.props
     const { dateAndTime } = this.state
-
 
     return (
       <Layout style={{ height: '100%' }}>

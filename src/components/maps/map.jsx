@@ -96,7 +96,7 @@ class FloorMap extends Component {
 
   // load the 1st floor image when the image are loaded for the first time
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.floorMaps.length && nextProps.floorMaps !== prevState.floorMaps) {
+    if (nextProps.floorMaps && nextProps.floorMaps.length && nextProps.floorMaps !== prevState.floorMaps) {
       let currentFloor
       if (!prevState.currentFloor) {
         currentFloor = nextProps.floorMaps.find(floorMap => floorMap.floor == prevState.currentFloorNumber)
