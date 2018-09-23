@@ -24,9 +24,9 @@ const App = () => (
       <Route exact path="/about-us" component={About} />
       <Route exact path="/sign-up" component={SignUp} />
       <Nav>
-        <Route exact path="/dashboard/dashboard" component={Dashboard} />
-        <Route exact path="/dashboard/map" component={FloorMap} />
-        <Route exact path="/dashboard/guide" component={Guide} />
+        <AuthenticatedRoute exact path="/dashboard/dashboard" component={Dashboard} />
+        <AuthenticatedRoute exact path="/dashboard/map" component={FloorMap} />
+        <AuthenticatedRoute exact path="/dashboard/guide" component={Guide} />
       </Nav>
     </Switch>
   </PersistGate>
