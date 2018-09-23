@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import {
-  Layout, Menu, Breadcrumb, Icon, Das, message
+  Layout, Menu, Breadcrumb, Icon, Das, message, Button
 } from 'antd'
 import { connect } from 'react-redux'
 import { dispatch } from 'redux-act'
@@ -13,6 +13,7 @@ import {
   getCountOfVisitorsToday,
   saveSelectedMenuItem
 } from '../../reducers/cisco'
+import { resetStore } from '../../reducers/reset'
 
 const { Header, Content, Sider } = Layout
 const styles = {
@@ -37,6 +38,7 @@ class NavToolBar extends React.Component {
     saveSelectedMenuItem: PropTypes.func.isRequired,
     location: PropTypes.object,
     userDevice: PropTypes.object,
+    resetStore: PropTypes.func.isRequired,
   }
 
   toggle = () => {
@@ -90,6 +92,11 @@ class NavToolBar extends React.Component {
     this.props.push(`/dashboard/${event.key}`)
   }
 
+  handleLogout = () => {
+    this.props.resetStore()
+    this.props.push('/')
+  }
+
   render() {
     const {
       children, onlineUsers, visitorsToday, selectedMenuItem
@@ -101,11 +108,12 @@ class NavToolBar extends React.Component {
         <Header className="header">
           <div className="logo" />
 
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={styles.headerItem}><b>CCMN</b></div>
             <div style={styles.headerItem}>{dateAndTime}</div>
             <div style={styles.headerItem}>Total Devices Connected: {onlineUsers}</div>
             <div style={styles.headerItem}>Visitors Today: {visitorsToday}</div>
+            <Button onClick={this.handleLogout} ghost style={styles.headerItem}>Log Out <Icon style={{ color: 'white' }} type="logout" theme="outlined" /></Button>
           </div>
 
         </Header>
@@ -154,6 +162,7 @@ const mapDispatchToProps = dispatch => ({
   getCountOfVisitorsToday: () => dispatch(getCountOfVisitorsToday()),
   push: path => dispatch(push(path)),
   saveSelectedMenuItem: selectedMenuItem => dispatch(saveSelectedMenuItem(selectedMenuItem)),
+  resetStore: () => dispatch(resetStore())
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(NavToolBar)
