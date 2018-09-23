@@ -59,6 +59,7 @@ class Login extends React.Component {
 
   state = {
     macAddress: '',
+    name: '',
     macAddressError: false,
   }
 
@@ -66,25 +67,12 @@ class Login extends React.Component {
     this.props.push({ pathname: '/sign-up' })
   }
 
-  onMacAddressChange = e => {
-    this.setState({ macAddress: e.target.value })
+  onInputChange = type => e => {
+    this.setState({ [type]: e.target.value })
   }
 
   goToDashboard = () => {
     this.props.push({ pathname: '/dashboard/dashboard' })
-  }
-
-  backButtonClicked = () => {
-    const queryString = qs.stringify(
-      {
-        emailIds: this.emailIds
-      },
-      { arrayFormat: 'bracket' }
-    )
-    this.props.push({
-      pathname: '/manage/integrations/hubspot/ctalist/',
-      search: queryString
-    })
   }
 
   handleLoginByMacAddress = () => {
@@ -93,7 +81,7 @@ class Login extends React.Component {
     if (foundDevice) {
       this.props.saveUserMacAddress(foundDevice)
       this.props.setLoggedIn()
-      const queryString = qs.stringify({ login: 'macAddress' })
+      const queryString = qs.stringify({ login: 'macAddress', name: this.state.name })
       this.props.push({ pathname: '/dashboard/dashboard', search: queryString })
     } else {
       this.macAddressError()
@@ -135,8 +123,17 @@ class Login extends React.Component {
             <Input
               style={styles.input}
               prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              value={this.state.name}
+              onChange={this.onInputChange('name')}
+              type="name"
+              placeholder="Name"
+              className={macAddressError ? 'error' : null}
+            />
+            <Input
+              style={styles.input}
+              prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
               value={this.state.macAddress}
-              onChange={this.onMacAddressChange}
+              onChange={this.onInputChange('macAddress')}
               type="macAddress"
               placeholder="MAC address"
               className={macAddressError ? 'error' : null}

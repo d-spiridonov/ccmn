@@ -59,7 +59,8 @@ class NavToolBar extends React.Component {
 
   componentDidMount() {
     const newLogin = qs.parse(this.props.location.search, { arrayFormat: 'bracket' }).login
-    if (newLogin) this.showSuccessMessage(newLogin)
+    const name = qs.parse(this.props.location.search, { arrayFormat: 'bracket' }).name
+    if (newLogin) this.showSuccessMessage(newLogin, name)
     this.handleSelect({ key: this.props.selectedMenuItem })
     this.props.getCountOfVisitorsToday()
     this.interval = setInterval(this.setDateAndTime, 1000)
@@ -78,10 +79,10 @@ class NavToolBar extends React.Component {
     return '3rd floor'
   }
 
-  showSuccessMessage = login => {
+  showSuccessMessage = (login, name) => {
     if (login == 'macAddress' && this.props.userDevice) {
       const macFloor = this.getMacFloor(this.props.userDevice)
-      message.success(`Welcome, ${this.props.userDevice.macAddress}. We are glad to see you on the ${macFloor}!`)
+      message.success(`Welcome, ${name}. We are glad to see you on the ${macFloor}!`)
     } else {
       message.success('Welcome, Anonymous!')
     }
