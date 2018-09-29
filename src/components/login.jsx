@@ -55,6 +55,9 @@ class Login extends React.Component {
 
   componentDidMount() {
     this.props.getAllClients()
+      .catch(err => {
+        message.error(`An error ocurred while trying to fetch clients data: ${err}`)
+      })
   }
 
   state = {

@@ -177,13 +177,18 @@ const getNewDevices = newActiveDevices => (dispatch, getState) => {
   dispatch(saveNewActiveDevices(newDevices))
 }
 
-export const getAllClients = () => dispatch => apiClientCMX.get('/api/location/v2/clients/')
-  .then(response => {
-    dispatch(saveActiveClients(response.data))
-    const activeMacAddresses = response.data
-    dispatch(getNewDevices(activeMacAddresses))
-    dispatch(saveActiveMacAddresses(activeMacAddresses))
-  })
+export const getAllClients = () => dispatch => new Promise((resolve, reject) => {
+  apiClientCMX.get('/api/location/v2/clients/')
+    .then(response => {
+      dispatch(saveActiveClients(response.data))
+      const activeMacAddresses = response.data
+      dispatch(getNewDevices(activeMacAddresses))
+      dispatch(saveActiveMacAddresses(activeMacAddresses))
+    })
+    .catch(err => {
+      reject(err)
+    })
+})
 
 
 export const getRepeatVisitorsHourlyToday = (startDate, endDate) => (dispatch, getState) => {
