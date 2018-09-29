@@ -60,7 +60,7 @@ class FloorMap extends Component {
   componentDidMount() {
     if (!this.state.currentFloor) {
       this.props.getAllMaps().catch(err => {
-        message.error(`An error occured while trying to fetch maps ${err}`)
+        message.error(`An error occured while trying to fetch maps: ${err}`)
       })
     }
     this.requestNewClients()
@@ -114,6 +114,7 @@ class FloorMap extends Component {
     else if (nextProps.newActiveDevices != prevState.newActiveDevices) {
       return { newActiveDevices: nextProps.newActiveDevices }
     }
+    return null
   }
 
   componentWillUnmount() {
@@ -286,6 +287,9 @@ class FloorMap extends Component {
           heatMap: res,
           loadingClientHistory: false,
         })
+      })
+      .catch(err => {
+        message.error(`And error occured while trying to fetch clients history: ${err}`)
       })
     } else {
       this.setState({

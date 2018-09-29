@@ -20,7 +20,7 @@ class RepearVisitors extends Component {
 
   componentDidMount() {
     this.props.getRepeatVisitorsHourlyToday().catch(err => {
-      message.error(`An error occured while trying to fetch Repeat Visitors ${err}`)
+      message.error(`An error occured while trying to fetch Repeat Visitors: ${err}`)
     })
   }
 

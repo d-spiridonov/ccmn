@@ -84,7 +84,7 @@ class Dashboard extends Component {
   }
 
   displayRequestErrorMessage = (err) => {
-    message.error(`An error occured while trying to fetch data ${err}`)
+    message.error(`An error occured while trying to fetch data: ${err}`)
   }
 
   // For Date Picker

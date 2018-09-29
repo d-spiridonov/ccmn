@@ -258,7 +258,7 @@ export const getPsserby = (startDate, endDate) => (dispatch, getState) => new Pr
     })
 })
 
-export const getConnected = (startDate, endDate) => (dispatch, getState) => {
+export const getConnected = (startDate, endDate) => (dispatch, getState) => new Promise((resolve, reject) => {
   const aesUId = getState().cisco.aesUId
   let endPoint = `/api/presence/v1/connected/hourly/${startDate}`
   let params = { params: { siteId: aesUId } }
@@ -270,12 +270,14 @@ export const getConnected = (startDate, endDate) => (dispatch, getState) => {
   apiClientPresence.get(endPoint, params)
     .then(response => {
       dispatch(saveConnected(response.data))
+      resolve()
     })
     .catch(error => {
+      reject(error)
     })
-}
+})
 
-export const getVisitors = (startDate, endDate) => (dispatch, getState) => {
+export const getVisitors = (startDate, endDate) => (dispatch, getState) => new Promise((resolve, reject) => {
   const aesUId = getState().cisco.aesUId
   let endPoint = `/api/presence/v1/visitor/hourly/${startDate}`
   let params = { params: { siteId: aesUId } }
@@ -287,12 +289,14 @@ export const getVisitors = (startDate, endDate) => (dispatch, getState) => {
   apiClientPresence.get(endPoint, params)
     .then(response => {
       dispatch(saveVisitors(response.data))
+      resolve()
     })
     .catch(error => {
+      reject(error)
     })
-}
+})
 
-export const getKpiSummarToday = () => (dispatch, getState) => {
+export const getKpiSummarToday = () => (dispatch, getState) => new Promise((resolve, reject) => {
   const aesUId = getState().cisco.aesUId
 
   apiClientPresence.get('/api/presence/v1/kpisummary/today', {
@@ -302,10 +306,13 @@ export const getKpiSummarToday = () => (dispatch, getState) => {
   })
     .then(response => {
       dispatch(saveKpiSummarToday(response.data))
+      resolve()
     })
     .catch(error => {
+      reject(err)
     })
-}
+})
+
 const isMacFloorSelected = (floor, deviceFloor) => {
   if ((deviceFloor.includes('1st_floor') && floor == 1) || (deviceFloor.includes('2nd_floor')
 && floor == 2) || (deviceFloor.includes('3rd_floor') && floor == 3)) return true
