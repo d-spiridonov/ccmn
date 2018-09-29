@@ -41,6 +41,7 @@ class HeatMap extends Component {
           startValue: nextProps.startDate || prevState.startDate
         }
       }
+      return null
     }
 
     disabledStartDate = (startValue) => {

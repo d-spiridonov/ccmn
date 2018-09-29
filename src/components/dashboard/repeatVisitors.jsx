@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Line } from 'react-chartjs-2'
 import { connect } from 'react-redux'
 import {
-  Layout, Radio, Row, Col
+  Layout, Radio, Row, Col, message
 } from 'antd'
 
 const { Header, Content, Footer, } = Layout
@@ -19,7 +19,9 @@ class RepearVisitors extends Component {
   }
 
   componentDidMount() {
-    this.props.getRepeatVisitorsHourlyToday()
+    this.props.getRepeatVisitorsHourlyToday().catch(err => {
+      message.error(`An error occured while trying to fetch Repeat Visitors: ${err}`)
+    })
   }
 
   renderDaily = (type, data) => {
