@@ -45,39 +45,42 @@ class Dashboard extends Component {
   // Checker fo inpud dates
   dateCheakerRepeat = (dateStart, dateEnd, dateString) => {
     if (dateEnd.diff(dateStart, 'days') === 0) {
-      try {
-        this.props.getDwell('today')
-        this.props.getRepeatVisitorsHourlyToday('today')
-        this.props.getPsserby('today')
-        this.props.getConnected('today')
-        this.props.getVisitors('today')
-      } catch (err) {
+      Promise.all([
+        this.props.getDwell('today'),
+        this.props.getRepeatVisitorsHourlyToday('today'),
+        this.props.getPsserby('today'),
+        this.props.getConnected('today'),
+        this.props.getVisitors('today'),
+       ])
+        .catch(err => {
         this.displayRequestErrorMessage(err)
-      }
+      })
     }
     else {
-      try {
-        this.props.getDwell(dateString[0], dateString[1])
-        this.props.getPsserby(dateString[0], dateString[1])
-        this.props.getConnected(dateString[0], dateString[1])
-        this.props.getVisitors(dateString[0], dateString[1])
-        this.props.getRepeatVisitorsHourlyToday(dateString[0], dateString[1])
-      } catch (err) {
+      Promise.all([
+        this.props.getDwell(dateString[0], dateString[1]),
+        this.props.getPsserby(dateString[0], dateString[1]),
+        this.props.getConnected(dateString[0], dateString[1]),
+        this.props.getVisitors(dateString[0], dateString[1]),
+        this.props.getRepeatVisitorsHourlyToday(dateString[0], dateString[1]),
+      ]) 
+      .catch(err => {
         this.displayRequestErrorMessage(err)
-      }
+      })
     }
   }
 
   changeDateSelect = (date) => {
-    try {
-      this.props.getRepeatVisitorsHourlyToday(date)
-      this.props.getDwell(date)
-      this.props.getPsserby(date)
-      this.props.getConnected(date)
-      this.props.getVisitors(date)
-    } catch (err) {
+    Promise.all([
+      this.props.getRepeatVisitorsHourlyToday(date),
+      this.props.getDwell(date),
+      this.props.getPsserby(date),
+      this.props.getConnected(date),
+      this.props.getVisitors(date),
+    ])
+    .catch(err => {
       this.displayRequestErrorMessage(err)
-    }
+    })
   }
 
   displayRequestErrorMessage = (err) => {

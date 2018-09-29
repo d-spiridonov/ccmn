@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Bar } from 'react-chartjs-2'
 import { connect } from 'react-redux'
 import {
-  Layout, Radio, Row, Col
+  Layout, Radio, Row, Col, message
 } from 'antd'
 
 const { Header, Content, Footer, } = Layout
@@ -23,9 +23,14 @@ class Passerby extends Component {
   }
 
   componentDidMount() {
-    this.props.getPsserby()
-    this.props.getConnected()
-    this.props.getVisitors()
+    Promise.all([
+      this.props.getPsserby(),
+      this.props.getConnected(),
+      this.props.getVisitors(),
+    ]) 
+    .catch(err => {
+      message.error(`An error ocurred while trying to fetch passerby data ${err}`)
+    })
   }
 
   renderDaily = (type, data) => {

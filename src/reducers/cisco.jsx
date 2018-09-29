@@ -239,7 +239,7 @@ export const getDwell = (startDate, endDate) => (dispatch, getState) => new Prom
     })
 })
 
-export const getPsserby = (startDate, endDate) => (dispatch, getState) => {
+export const getPsserby = (startDate, endDate) => (dispatch, getState) => new Promise((resolve, reject) => {
   const aesUId = getState().cisco.aesUId
   let endPoint = `/api/presence/v1/passerby/hourly/${startDate}`
   let params = { params: { siteId: aesUId } }
@@ -251,10 +251,12 @@ export const getPsserby = (startDate, endDate) => (dispatch, getState) => {
   apiClientPresence.get(endPoint, params)
     .then(response => {
       dispatch(savePasserby(response.data))
+      resolve()
     })
     .catch(error => {
+      reject(error)
     })
-}
+})
 
 export const getConnected = (startDate, endDate) => (dispatch, getState) => {
   const aesUId = getState().cisco.aesUId
