@@ -19,8 +19,6 @@ export const saveDashBoardType = createAction('save dash board type')
 export const saveNewActiveDevices = createAction('save new active devices')
 export const saveDailyStatsForForecasting = createAction('save daily stats for forecasting')
 
-const timeseries = require('timeseries-analysis')
-
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
 const password_cmx = 'just4reading'
