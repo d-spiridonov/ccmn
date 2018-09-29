@@ -65,10 +65,13 @@ export const ciscoInitialState = {
   dashBoardType: 'today'
 }
 
-export const getNumberOfOnlineUsers = () => dispatch => apiClientCMX('/api/location/v2/clients/count/')
-  .then(res => {
-    if (res.data.count) dispatch(saveOnlineUsers(res.data.count))
-  }).catch((err) => { console.warn(err) })
+export const getNumberOfOnlineUsers = () => dispatch => new Promise((resolve, reject) => {
+  apiClientCMX('/api/location/v2/clients/count/')
+    .then(res => {
+      if (res.data.count) dispatch(saveOnlineUsers(res.data.count))
+      resolve(res)
+    }).catch((err) => { reject(err) })
+})
 
 // this function should be invoked in header
 export const getAesUId = () => dispatch => new Promise((resolve, reject) => {
@@ -77,12 +80,11 @@ export const getAesUId = () => dispatch => new Promise((resolve, reject) => {
       if (res.data[0]) dispatch(saveAesUId(res.data[0].aesUId))
       resolve()
     }).catch((err) => {
-      console.warn(err)
       reject(err)
     })
 })
 
-const requestCountOfVisitorsToday = () => (dispatch, getState) => {
+const requestCountOfVisitorsToday = () => (dispatch, getState) => new Promise((resolve, reject) => {
   const aesUId = getState().cisco.aesUId
   apiClientPresence('/api/presence/v1/connected/count/today', {
     params: {
@@ -91,18 +93,28 @@ const requestCountOfVisitorsToday = () => (dispatch, getState) => {
   })
     .then(res => {
       if (res.data) dispatch(saveTotalVisitorsToday(res.data))
-    }).catch((err) => { console.warn(err) })
-}
+      resolve()
+    }).catch((err) => {
+      reject(err)
+    })
+})
 
-export const getCountOfVisitorsToday = () => (dispatch, getState) => {
+export const getCountOfVisitorsToday = () => (dispatch, getState) => new Promise((resolve, reject) => {
   if (!getState.ciscoaesUId) {
     dispatch(getAesUId()).then(() => {
-      dispatch(requestCountOfVisitorsToday())
+      dispatch(requestCountOfVisitorsToday()).catch(err => {
+        reject(err)
+      })
+    }).catch(err => {
+      reject(err)
     })
   } else {
     dispatch(requestCountOfVisitorsToday())
+      .catch(err => {
+        reject(err)
+      })
   }
-}
+})
 
 export const getSelectedMac = macAddressToFind => (dispatch, getState) => {
   const macAddressesList = getState().cisco.activeClients
@@ -113,7 +125,7 @@ export const getSelectedMac = macAddressToFind => (dispatch, getState) => {
 // pass an object and an path array to look for the particular key
 const getNestedObject = (nestedObj, pathArr) => pathArr.reduce((obj, key) => (obj && obj[key] !== 'undefined') ? obj[key] : undefined, nestedObj)
 
-const requestMaps = floorList => dispatch => {
+const requestMaps = floorList => dispatch => new Promise((resolve, reject) => {
   let imageSrcs = []
   floorList.forEach(floor => {
     apiClientCMX.get(`/api/config/v1/maps/imagesource/${floor.image.imageName}`,
@@ -134,18 +146,29 @@ const requestMaps = floorList => dispatch => {
           height: ((floor || {}).dimension || {}).length,
         })
       })
+      .catch(err => {
+        reject(err)
+      })
   })
   dispatch(saveFloorImages(imageSrcs))
-}
+})
 
-export const getAllMaps = () => dispatch => apiClientCMX.get(
-  '/api/config/v1/maps',
-)
-  .then(response => {
-    const floorList = getNestedObject(response.data, ['campuses', 2, 'buildingList', 0, 'floorList'])
-    const filteredFloorList = floorList.filter(floor => floor.image && floor.image.imageName)
-    dispatch(requestMaps(filteredFloorList))
-  })
+export const getAllMaps = () => dispatch => new Promise((resolve, reject) => {
+  apiClientCMX.get(
+    '/api/config/v1/maps',
+  )
+    .then(response => {
+      const floorList = getNestedObject(response.data, ['campuses', 2, 'buildingList', 0, 'floorList'])
+      const filteredFloorList = floorList.filter(floor => floor.image && floor.image.imageName)
+      dispatch(requestMaps(filteredFloorList))
+        .catch(err => {
+          reject(err)
+        })
+    })
+    .catch(err => {
+      reject(err)
+    })
+})
 
 // filter out new devices
 const getNewDevices = newActiveDevices => (dispatch, getState) => {

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, DatePicker, notification
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, DatePicker, notification, message
 } from 'antd'
 import moment from 'moment'
 import {
@@ -55,7 +55,11 @@ class FloorMap extends Component {
   }
 
   componentDidMount() {
-    if (!this.state.currentFloor) this.props.getAllMaps()
+    if (!this.state.currentFloor) {
+      this.props.getAllMaps().catch(err => {
+        message.error(`An error occured while trying to fetch maps ${err}`)
+      })
+    }
     this.requestNewClients()
     this.requestNewClientsInterval = setInterval(this.requestNewClients, refreshInterval)
   }
