@@ -36,6 +36,10 @@ class Forecast extends Component {
       // get the forecast for each day of the week starting from Sunday
       forecast[day] = this.getForecastedDay(currentDayArray)
     }
+    if (!forecast) return
+    this.setState({
+      forecastArray: forecast
+    })
   }
 
   getForecastedDay = currentDayArray => {
