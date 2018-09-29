@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { Line } from 'react-chartjs-2'
 import { connect } from 'react-redux'
 import {
-  Layout, Radio, Row, Col, Select, DatePicker, Tooltip
+  Layout, Radio, Row, Col, Select, DatePicker, Tooltip, message
 } from 'antd'
 import RepearVisitors from './dashboard/repeatVisitors'
 import Dwell from './dashboard/dwell'
@@ -45,30 +45,46 @@ class Dashboard extends Component {
   // Checker fo inpud dates
   dateCheakerRepeat = (dateStart, dateEnd, dateString) => {
     if (dateEnd.diff(dateStart, 'days') === 0) {
-      this.props.getDwell('today')
-      this.props.getRepeatVisitorsHourlyToday('today')
-      this.props.getPsserby('today')
-      this.props.getConnected('today')
-      this.props.getVisitors('today')
+      try {
+        this.props.getDwell('today')
+        this.props.getRepeatVisitorsHourlyToday('today')
+        this.props.getPsserby('today')
+        this.props.getConnected('today')
+        this.props.getVisitors('today')
+      } catch (err) {
+        this.displayRequestErrorMessage(err)
+      }
     }
     else {
-      this.props.getDwell(dateString[0], dateString[1])
-      this.props.getPsserby(dateString[0], dateString[1])
-      this.props.getConnected(dateString[0], dateString[1])
-      this.props.getVisitors(dateString[0], dateString[1])
-      this.props.getRepeatVisitorsHourlyToday(dateString[0], dateString[1])
+      try {
+        this.props.getDwell(dateString[0], dateString[1])
+        this.props.getPsserby(dateString[0], dateString[1])
+        this.props.getConnected(dateString[0], dateString[1])
+        this.props.getVisitors(dateString[0], dateString[1])
+        this.props.getRepeatVisitorsHourlyToday(dateString[0], dateString[1])
+      } catch (err) {
+        this.displayRequestErrorMessage(err)
+      }
     }
   }
 
   changeDateSelect = (date) => {
-    this.props.getRepeatVisitorsHourlyToday(date)
-    this.props.getDwell(date)
-    this.props.getPsserby(date)
-    this.props.getConnected(date)
-    this.props.getVisitors(date)
+    try {
+      this.props.getRepeatVisitorsHourlyToday(date)
+      this.props.getDwell(date)
+      this.props.getPsserby(date)
+      this.props.getConnected(date)
+      this.props.getVisitors(date)
+    } catch (err) {
+      this.displayRequestErrorMessage(err)
+    }
   }
-  // For Date Picker
 
+  displayRequestErrorMessage = (err) => {
+    message.error(`An error occured while trying to fetch data ${err}`)
+  }
+
+  // For Date Picker
   changeDate = (date, dateString) => {
     if (dateString[0]) {
       this.dateCheakerRepeat(date[0], date[1], dateString)

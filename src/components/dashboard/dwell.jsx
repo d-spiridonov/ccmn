@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Bar } from 'react-chartjs-2'
 import { connect } from 'react-redux'
 import {
-  Layout, Radio, Row, Col
+  Layout, Radio, Row, Col, message
 } from 'antd'
 
 const { Header, Content, Footer, } = Layout
@@ -20,6 +20,9 @@ class Dwell extends Component {
 
   componentDidMount() {
     this.props.getDwell()
+    .catch(err => {
+      message.error(`An error ocurred while trying to fetch dwell data ${err}`)
+    })
   }
 
   renderDaily = (type, data) => {

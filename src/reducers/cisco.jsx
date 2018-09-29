@@ -79,7 +79,8 @@ export const getAesUId = () => dispatch => new Promise((resolve, reject) => {
     .then(res => {
       if (res.data[0]) dispatch(saveAesUId(res.data[0].aesUId))
       resolve()
-    }).catch((err) => {
+    })
+    .catch((err) => {
       reject(err)
     })
 })
@@ -105,11 +106,12 @@ export const getCountOfVisitorsToday = () => (dispatch, getState) => new Promise
       dispatch(requestCountOfVisitorsToday()).catch(err => {
         reject(err)
       })
-    }).catch(err => {
-      reject(err)
     })
   } else {
     dispatch(requestCountOfVisitorsToday())
+      .resolve(() => {
+        resolve()
+      })
       .catch(err => {
         reject(err)
       })
@@ -146,6 +148,9 @@ const requestMaps = floorList => dispatch => new Promise((resolve, reject) => {
           height: ((floor || {}).dimension || {}).length,
         })
       })
+      .resolve(() => {
+        resolve()
+      })
       .catch(err => {
         reject(err)
       })
@@ -164,6 +169,9 @@ export const getAllMaps = () => dispatch => new Promise((resolve, reject) => {
         .catch(err => {
           reject(err)
         })
+    })
+    .resolve(() => {
+      resolve()
     })
     .catch(err => {
       reject(err)
@@ -184,6 +192,7 @@ export const getAllClients = () => dispatch => new Promise((resolve, reject) => 
       const activeMacAddresses = response.data
       dispatch(getNewDevices(activeMacAddresses))
       dispatch(saveActiveMacAddresses(activeMacAddresses))
+      resolve()
     })
     .catch(err => {
       reject(err)
@@ -191,7 +200,7 @@ export const getAllClients = () => dispatch => new Promise((resolve, reject) => 
 })
 
 
-export const getRepeatVisitorsHourlyToday = (startDate, endDate) => (dispatch, getState) => {
+export const getRepeatVisitorsHourlyToday = (startDate, endDate) => (dispatch, getState) => new Promise((resolve, reject) => {
   const aesUId = getState().cisco.aesUId
   let endPoint = `/api/presence/v1/repeatvisitors/hourly/${startDate}`
   let params = { params: { siteId: aesUId } }
@@ -203,12 +212,15 @@ export const getRepeatVisitorsHourlyToday = (startDate, endDate) => (dispatch, g
   apiClientPresence.get(endPoint, params)
     .then(response => {
       dispatch(saveRepeatVisitorsHourlyToday(response.data))
+      resolve()
     })
     .catch(error => {
+      reject(error)
     })
-}
+})
 
-export const getDwell = (startDate, endDate) => (dispatch, getState) => {
+
+export const getDwell = (startDate, endDate) => (dispatch, getState) => new Promise((resolve, reject) => {
   const aesUId = getState().cisco.aesUId
   let endPoint = `/api/presence/v1/dwell/hourly/${startDate}`
   let params = { params: { siteId: aesUId } }
@@ -220,10 +232,12 @@ export const getDwell = (startDate, endDate) => (dispatch, getState) => {
   apiClientPresence.get(endPoint, params)
     .then(response => {
       dispatch(saveDwell(response.data))
+      resolve()
     })
     .catch(error => {
+      reject(error)
     })
-}
+})
 
 export const getPsserby = (startDate, endDate) => (dispatch, getState) => {
   const aesUId = getState().cisco.aesUId
