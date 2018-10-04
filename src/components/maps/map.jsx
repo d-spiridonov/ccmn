@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, DatePicker, notification
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, DatePicker, notification, message
 } from 'antd'
 import moment from 'moment'
 import {
@@ -52,10 +52,17 @@ class FloorMap extends Component {
 
   requestNewClients = () => {
     this.props.getAllClients()
+      .catch(err => {
+        message.error(`An error ocurred while trying to fetch clients data: ${err}`)
+      })
   }
 
   componentDidMount() {
-    if (!this.state.currentFloor) this.props.getAllMaps()
+    if (!this.state.currentFloor) {
+      this.props.getAllMaps().catch(err => {
+        message.error(`An error occured while trying to fetch maps: ${err}`)
+      })
+    }
     this.requestNewClients()
     this.requestNewClientsInterval = setInterval(this.requestNewClients, refreshInterval)
   }
@@ -107,6 +114,7 @@ class FloorMap extends Component {
     else if (nextProps.newActiveDevices != prevState.newActiveDevices) {
       return { newActiveDevices: nextProps.newActiveDevices }
     }
+    return null
   }
 
   componentWillUnmount() {
@@ -279,6 +287,9 @@ class FloorMap extends Component {
           heatMap: res,
           loadingClientHistory: false,
         })
+      })
+      .catch(err => {
+        message.error(`And error occured while trying to fetch clients history: ${err}`)
       })
     } else {
       this.setState({

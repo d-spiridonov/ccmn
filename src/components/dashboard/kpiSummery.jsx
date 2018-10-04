@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { HorizontalBar } from 'react-chartjs-2'
 import { connect } from 'react-redux'
 import {
-  Layout, Radio, Row, Col
+  Layout, Radio, Row, Col, message
 } from 'antd'
 
 const { Header, Content, Footer, } = Layout
@@ -18,8 +18,9 @@ class kpiSummarToday extends Component {
 
   componentDidMount() {
     this.props.getKpiSummarToday()
-    console.log(Object.values(this.props.kpiSummarToday).slice(2, 5))
-    console.log(Object.keys(this.props.kpiSummarToday).slice(2, 5))
+    .catch(err => {
+      message.error(`An error occured while trying to fetch KPI summary: ${err}`)
+    })
   }
 
   render() {

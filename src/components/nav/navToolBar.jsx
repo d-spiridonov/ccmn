@@ -55,6 +55,9 @@ class NavToolBar extends React.Component {
 
   getTotalDevicesConnected = () => {
     this.props.getNumberOfOnlineUsers()
+      .catch(err => {
+        message.error(`An error occured while trying to fetch the total number of devices connected: ${err}`)
+      })
   }
 
   componentDidMount() {
@@ -63,6 +66,9 @@ class NavToolBar extends React.Component {
     if (newLogin) this.showSuccessMessage(newLogin, name)
     this.handleSelect({ key: this.props.selectedMenuItem })
     this.props.getCountOfVisitorsToday()
+      .catch(err => {
+        message.error(`An error occured while trying to fetch the total number of visitors: ${err}`)
+      })
     this.interval = setInterval(this.setDateAndTime, 1000)
     this.devicesConnectedInterval = setInterval(this.getTotalDevicesConnected, 10000)
   }
