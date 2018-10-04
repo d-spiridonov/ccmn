@@ -17,6 +17,7 @@ export const saveVisitors = createAction('save visitors')
 export const saveKpiSummarToday = createAction('save kpi summary today')
 export const saveDashBoardType = createAction('save dash board type')
 export const saveNewActiveDevices = createAction('save new active devices')
+export const saveDailyStatsForForecasting = createAction('save daily stats for forecasting')
 
 const url_cmx = 'https://cisco-cmx.unit.ua'
 const username_cmx = 'RO'
@@ -62,7 +63,8 @@ export const ciscoInitialState = {
   kpiSummarToday: null,
   dashboardCurrent: 'today',
   dashboardListInput: ['today', 'yesterday', '3days'],
-  dashBoardType: 'today'
+  dashBoardType: 'today',
+  dailyForecastingStats: [],
 }
 
 export const getNumberOfOnlineUsers = () => dispatch => new Promise((resolve, reject) => {
@@ -341,7 +343,18 @@ export const getClientsHistory = ({
   apiClientCMX.get(`/api/location/v1/history/clients?locatedAfterTime=${fromDate}&locatedBeforeTime=${toDate}`).then(res => {
     devices = res.data
     const devicesFilteredByFloor = devices.filter(device => isMacFloorSelected(floor, device.mapInfo.mapHierarchyString.toLowerCase()))
-    resolve(devicesFilteredByFloor)
+    resolve(res)
+  })
+    .catch(err => {
+      reject(err)
+    })
+})
+
+export const getDailyStatsForForecasting = ({ startDate, endDate }) => (dispatch, getState) => new Promise((resolve, reject) => {
+  const siteId = getState().cisco.aesUId
+  apiClientPresence.get(`/api/presence/v1/connected/daily?siteId=${siteId}&startDate=${startDate}&endDate=${endDate}`).then(res => {
+    dispatch(saveDailyStatsForForecasting(res.data))
+    resolve(resolve)
   })
     .catch(err => {
       reject(err)
@@ -409,6 +422,10 @@ export default createReducer(
     [saveNewActiveDevices]: (state, newActiveDevices) => ({
       ...state,
       newActiveDevices,
+    }),
+    [saveDailyStatsForForecasting]: (state, dailyForecastingStats) => ({
+      ...state,
+      dailyForecastingStats,
     })
   },
   ciscoInitialState

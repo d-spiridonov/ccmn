@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Line } from 'react-chartjs-2'
+import { Line, Bar } from 'react-chartjs-2'
 import { connect } from 'react-redux'
 import {
   Layout, Radio, Row, Col, message
@@ -100,7 +100,7 @@ class RepearVisitors extends Component {
       <Content>
         <h2>Repeat Visitors</h2>
         <div className="chart-box">
-          <Line data={data} width={100} height={40} />
+          <Bar data={data} width={100} height={40} />
         </div>
       </Content>
     )
