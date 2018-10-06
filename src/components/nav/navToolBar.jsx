@@ -69,6 +69,7 @@ class NavToolBar extends React.Component {
       .catch(err => {
         message.error(`An error occured while trying to fetch the total number of visitors: ${err}`)
       })
+    this.getTotalDevicesConnected()
     this.interval = setInterval(this.setDateAndTime, 1000)
     this.devicesConnectedInterval = setInterval(this.getTotalDevicesConnected, 10000)
   }
