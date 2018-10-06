@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import {
-  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Checkbox, Popover, Icon, Tooltip, DatePicker, notification, message
+  Button, Radio, Input, AutoComplete, Spin, Card, Slider, Switch, Popover, Icon, Tooltip, notification, message
 } from 'antd'
 import moment from 'moment'
 import {
@@ -63,7 +63,6 @@ class FloorMap extends Component {
         message.error(`An error occured while trying to fetch maps: ${err}`)
       })
     }
-    // this.requestNewClients()
     this.requestNewClientsInterval = setInterval(this.requestNewClients, refreshInterval)
   }
 
@@ -329,7 +328,7 @@ class FloorMap extends Component {
     const mapWidth = currentFloor ? currentFloor.width : 0
     const macAddresses = activeMacAddresses ? activeMacAddresses.map(macAddress => macAddress.macAddress) : []
 
-    return ( // TODO: refactor to smaller components
+    return (
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div>
           <div style={{ width: 250, flexDirection: 'column' }}>
@@ -369,9 +368,12 @@ class FloorMap extends Component {
           />
           <Button style={{ marginTop: 20, width: '100%' }} type="primary" disabled={!this.props.userDevice} onClick={() => this.handleMacSelect(this.props.userDevice.macAddress)}>Find me</Button>
         </div>
+        {!currentFloor && <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Spin size="large" />
+          </div>}
         <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginRight: 50 }}>
-            {currentFloor ? (
+            {currentFloor &&
               <div
                 style={{
                   position: 'absolute', zIndex: 99, width: mapWidth, height: mapHeight
@@ -393,8 +395,7 @@ class FloorMap extends Component {
                 {heatMap && heatMap.map((device, index) => (
                   <div key={device.macAddress + device.changedOn} id={device.macAddress} style={this.getCircleStyle('pink', device.mapCoordinate.x, device.mapCoordinate.y)} />
                 ))}
-              </div>
-            ) : <Spin size="large" />}
+              </div>}
             <img style={{ height: mapHeight }} src={currentFloor ? currentFloor.src : null} />
           </div>
           <Card title="Client" style={{ width: 300 }}>
