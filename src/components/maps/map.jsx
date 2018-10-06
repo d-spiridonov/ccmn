@@ -382,7 +382,7 @@ class FloorMap extends Component {
               >
                 {showMacCoordinates
                   && (
-                  <Popover id={selectedMac.macAddress} content={this.content(selectedMac.macAddress)} title="Device" trigger="hover">
+                  <Popover key={selectedMac.macAddress} id={selectedMac.macAddress} content={this.content(selectedMac.macAddress)} title="Device" trigger="hover">
                     <div style={this.getCircleStyle('red', this.state.posX, this.state.posY)} />
                   </Popover>
                   )}
