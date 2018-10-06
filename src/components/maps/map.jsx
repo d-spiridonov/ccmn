@@ -453,7 +453,7 @@ CountConnected.propTypes = {
 
 const MacData = ({ selectedMac, currentTime }) => {
   let lastSeen
-  if (selectedMac) lastSeen = moment(selectedMac.statistics.lastLocatedTime).from(currentTime)
+  if (selectedMac) lastSeen = moment(selectedMac.statistics.lastLocatedTime).from(moment())
   return (
     <div>
       <p className="BlueHeader">MAC Address:</p>
