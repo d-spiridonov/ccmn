@@ -149,8 +149,6 @@ const requestMaps = floorList => dispatch => new Promise((resolve, reject) => {
           // yes, we take length as a height, stupid CISCO API
           height: ((floor || {}).dimension || {}).length,
         })
-      })
-      .resolve(() => {
         resolve()
       })
       .catch(err => {
@@ -171,8 +169,6 @@ export const getAllMaps = () => dispatch => new Promise((resolve, reject) => {
         .catch(err => {
           reject(err)
         })
-    })
-    .resolve(() => {
       resolve()
     })
     .catch(err => {
