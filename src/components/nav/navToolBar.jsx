@@ -10,8 +10,8 @@ import { push } from 'react-router-redux'
 import qs from 'query-string'
 import {
   getNumberOfOnlineUsers,
-  getCountOfVisitorsToday,
-  saveSelectedMenuItem
+  saveSelectedMenuItem,
+  requestCountOfVisitorsToday,
 } from '../../reducers/cisco'
 import { resetStore } from '../../reducers/reset'
 
@@ -167,7 +167,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   getNumberOfOnlineUsers: () => dispatch(getNumberOfOnlineUsers()),
-  getCountOfVisitorsToday: () => dispatch(getCountOfVisitorsToday()),
+  getCountOfVisitorsToday: () => dispatch(requestCountOfVisitorsToday()),
   push: path => dispatch(push(path)),
   saveSelectedMenuItem: selectedMenuItem => dispatch(saveSelectedMenuItem(selectedMenuItem)),
   resetStore: () => dispatch(resetStore())

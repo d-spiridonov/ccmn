@@ -87,7 +87,7 @@ export const getAesUId = () => dispatch => new Promise((resolve, reject) => {
     })
 })
 
-const requestCountOfVisitorsToday = () => (dispatch, getState) => new Promise((resolve, reject) => {
+export const requestCountOfVisitorsToday = () => (dispatch, getState) => new Promise((resolve, reject) => {
   const aesUId = getState().cisco.aesUId
   apiClientPresence('/api/presence/v1/connected/count/today', {
     params: {
@@ -100,24 +100,6 @@ const requestCountOfVisitorsToday = () => (dispatch, getState) => new Promise((r
     }).catch((err) => {
       reject(err)
     })
-})
-
-export const getCountOfVisitorsToday = () => (dispatch, getState) => new Promise((resolve, reject) => {
-  if (!getState.ciscoaesUId) {
-    dispatch(getAesUId()).then(() => {
-      dispatch(requestCountOfVisitorsToday()).catch(err => {
-        reject(err)
-      })
-    })
-  } else {
-    dispatch(requestCountOfVisitorsToday())
-      .resolve(() => {
-        resolve()
-      })
-      .catch(err => {
-        reject(err)
-      })
-  }
 })
 
 export const getSelectedMac = macAddressToFind => (dispatch, getState) => {

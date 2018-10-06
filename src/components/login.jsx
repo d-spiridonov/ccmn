@@ -9,7 +9,7 @@ import { push } from 'react-router-redux'
 import axios from 'axios'
 import qs from 'query-string'
 import { performLogin, setLoggedIn, saveUserMacAddress } from '../reducers/auth'
-import { getAllClients } from '../reducers/cisco'
+import { getAllClients, getAesUId } from '../reducers/cisco'
 import './login.css'
 
 
@@ -54,7 +54,10 @@ class Login extends React.Component {
   }
 
   componentDidMount() {
-    this.props.getAllClients()
+    Promise.all([
+      this.props.getAesUId(),
+      this.props.getAllClients()
+    ])
       .catch(err => {
         message.error(`An error ocurred while trying to fetch clients data: ${err}`)
       })
@@ -173,6 +176,7 @@ const mapDispatchToProps = dispatch => ({
   setLoggedIn: () => dispatch(setLoggedIn(true)),
   saveUserMacAddress: userDevice => dispatch(saveUserMacAddress(userDevice)),
   getAllClients: () => dispatch(getAllClients()),
+  getAesUId: () => dispatch(getAesUId())
 })
 
 export default connect(
