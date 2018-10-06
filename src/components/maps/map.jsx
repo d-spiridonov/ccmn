@@ -283,7 +283,7 @@ class FloorMap extends Component {
       })
       this.props.getClientsHistory({ fromDate, toDate, floor: this.state.currentFloorNumber }).then(res => {
         this.setState({
-          heatMap: res,
+          heatMap: res.data,
           loadingClientHistory: false,
         })
       })
@@ -388,7 +388,7 @@ class FloorMap extends Component {
                   )}
                 {showConnectedDevicesFromCurrentFloor && connectedDevicesFromCurrentFloor
                 && connectedDevicesFromCurrentFloor.map(device => (
-                  <Popover id={device.macAddress} content={this.content(device.macAddress)} title="Device" trigger="hover">
+                  <Popover key={device.macAddress} id={device.macAddress} content={this.content(device.macAddress)} title="Device" trigger="hover">
                     <div key={device.macAddress} id={device.macAddress} style={this.getCircleStyle('green', device.mapCoordinate.x, device.mapCoordinate.y)} />
                   </Popover>
                 ))}
