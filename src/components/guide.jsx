@@ -19,11 +19,15 @@ const Guide = () => (
 
       <p>Yesterday—Visitors who visited the site the previous day.</p>
     </Panel>
-    <Panel header="This is panel header 2" key="2">
-      <p>This is panel header 1</p>
+    <Panel header="Proximity" key="2">
+      <p>Shows information such as those pertaining to passersby, visitors, and connected devices, by hour (if it is a single day or last 3 days), or by day, for the given site.</p>
     </Panel>
-    <Panel header="This is panel header 3" key="3">
-      <p>This is panel header 1</p>
+    <Panel header="Dwell Time" key="3">
+      <p>Shows repeat visitors by hour or by day. You can see the following repeat visitor categories:</p>
+      <p>Weekly—Visitors who visited the selected site at least on 2 different weeks over the last 4 weeks.</p>      
+      <p>First Time—Visitors who visited the selected site for the first time.</p>      
+      <p>Occasional—Visitors who are not daily, weekly, or first-time visitors.</p>      
+      <p>Yesterday—Visitors who visited the site the previous day.</p>
     </Panel>
   </Collapse>
 )
