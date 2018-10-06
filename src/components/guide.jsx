@@ -30,9 +30,6 @@ const Guide = () => (
       <p>- <b>Occasional</b> — Visitors who are not daily, weekly, or first-time visitors;</p>      
       <p>- <b>Yesterday</b> — Visitors who visited the site the previous day.</p>
     </Panel>
-    <Panel header="Proximity" key="2">
-      <p>- Shows information such as those pertaining to passersby, visitors, and connected devices, by hour (if it is a single day or last 3 days), or by day, for the given site.</p>
-    </Panel>
   </Collapse>
   <Collapse accordion>
   <Panel header="Maps" key="1">
