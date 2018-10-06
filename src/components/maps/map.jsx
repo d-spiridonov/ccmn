@@ -63,7 +63,7 @@ class FloorMap extends Component {
         message.error(`An error occured while trying to fetch maps: ${err}`)
       })
     }
-    this.requestNewClients()
+    // this.requestNewClients()
     this.requestNewClientsInterval = setInterval(this.requestNewClients, refreshInterval)
   }
 
