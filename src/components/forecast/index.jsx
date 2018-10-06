@@ -75,28 +75,33 @@ class Forecast extends Component {
   getWeekDayNames = () => {
     let weekdaysArray = []
     for (let i = 1; i < 8; i++) {
-      weekdaysArray.push(moment().add(i, 'days').format('dddd'))
+      const currentDay = moment().add(i, 'days')
+      weekdaysArray.push(currentDay.format('dddd') + ', ' + currentDay.format("MMM Do YY"))
     }
     return weekdaysArray
   }
 
-  forecastData = () => ({
-    labels: this.getWeekDayNames(),
-    datasets: [{
-      data: this.state.forecast,
-      label: 'Weekly visitors forecast',
-      backgroundColor: 'rgba(74, 191, 191, 1)',
-      borderColor: ['rgba(53, 162, 235, 0.4)'],
-      fill: false,
-    }]
+  forecastData = (forecastFirstDay, forecastLastDay) => {
+    return({
+      labels: this.getWeekDayNames(),
+      datasets: [{
+        data: this.state.forecast,
+        label: `Weekly visitors forecast for the week ${forecastFirstDay} - ${forecastLastDay}`,
+        backgroundColor: 'rgba(74, 191, 191, 1)',
+        borderColor: ['rgba(53, 162, 235, 0.4)'],
+        fill: false,
+      }]
   })
+  }
 
   render() {
+    const forecastFirstDay = moment().add(1, 'day').format("MMM Do YY")
+    const forecastLastDay = moment().add(8, 'day').format("MMM Do YY")
     return (
       <Content>
-        <h2>Weekly visitors forecast</h2>
+        <h2>Weekly visitors forecast for the week {forecastFirstDay} - {forecastLastDay}</h2>
         <div className="chart-box">
-          {this.state.forecast.length ? <Bar data={this.forecastData()} width={100} height={40} /> : null}
+          {this.state.forecast.length ? <Bar data={this.forecastData(forecastFirstDay, forecastLastDay)} width={100} height={40} /> : null}
         </div>
       </Content>
     )
