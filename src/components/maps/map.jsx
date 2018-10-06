@@ -337,7 +337,7 @@ class FloorMap extends Component {
               <Radio.Button className="radioButton" value={2}>Floor 2</Radio.Button>
               <Radio.Button className="radioButton" value={3}>Floor 3</Radio.Button>
             </Radio.Group>
-            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'space-between', height: 65, marginTop: 1 }}>
               <AutoComplete
                 dataSource={macAddresses}
                 value={macAddress}
