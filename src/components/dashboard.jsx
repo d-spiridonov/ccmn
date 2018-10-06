@@ -109,10 +109,7 @@ class Dashboard extends Component {
       <div className="dashboard-container">
         <Row type="flex" justify="space-around" align="middle" gutter={24}>
           <Col className="gutter-row" span={14}>
-            <Radio.Group style={{ display: 'flex', flexDirection: 'row' }}>
-              <Radio.Button value={1}>General</Radio.Button>
-              <Radio.Button value={2}>TODAY</Radio.Button>
-            </Radio.Group>
+            
           </Col>
           <Col className="gutter-row" span={6}>
             <RangePicker disabledDate={this.disabledDate} onChange={this.changeDate} />
