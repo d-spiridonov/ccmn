@@ -111,7 +111,7 @@ class FloorMap extends Component {
         return { floorMaps: nextProps.floorMaps, currentFloor }
       }
     }
-    else if (nextProps.newActiveDevices != prevState.newActiveDevices) {
+    else if (nextProps.newActiveDevices !== prevState.newActiveDevices) {
       return { newActiveDevices: nextProps.newActiveDevices }
     }
     return null
