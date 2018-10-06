@@ -37,7 +37,7 @@ class Forecast extends Component {
     let daysBeforeAndCurrentDay = []
     if (currentDay !== 1) {
       // start from -2 from current day, so that the foreast is show from the next day
-      for (let current = currentDay - 2; current < 7; current++) {
+      for (let current = currentDay + 2; current < 7; current++) {
         const currentDay = forecast.shift()
         daysBeforeAndCurrentDay.push(currentDay)
         forecast.push(currentDay)
