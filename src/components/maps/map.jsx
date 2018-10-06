@@ -462,16 +462,32 @@ const MacData = ({ selectedMac, currentTime }) => {
       <Tooltip title="Indicates connected to the network as Associated and the APMacAddress is the AP which it is connected. Probing to find a valid AP to connect and the APMacAddress is the AP which has strongest reception. and Unknown for inactive client devices and clients with unknown IP addresses. Note, that CMX aggregates information from the wireless network, and therefore refer to the values defined in the AP or WLC.">
         <p>{selectedMac && <span>{selectedMac.dot11Status} <Icon type="info-circle" theme="outlined" /></span>}</p>
       </Tooltip>
-      <p className="BlueHeader">IP Address:</p>
-      <p>{selectedMac && selectedMac.ipAddress ? selectedMac.ipAddress[0] : null}</p>
+      {selectedMac && selectedMac.ipAddress
+      && (
+      <div>
+        <p className="BlueHeader">IP Address:</p>
+        <p>{selectedMac && selectedMac.ipAddress ? selectedMac.ipAddress[0] : null}</p>
+      </div>
+      )}
       <p className="BlueHeader">Last seen:</p>
       <p>{selectedMac && lastSeen}</p>
-      <p className="BlueHeader">Manufacturer:</p>
-      <p>{selectedMac && selectedMac.manufacturer}</p>
+      {selectedMac && selectedMac.manufacturer
+      && (
+      <div>
+        <p className="BlueHeader">Manufacturer:</p>
+        <p>{selectedMac && selectedMac.manufacturer}</p>
+      </div>
+      )}
       <p className="BlueHeader">Connected AP:</p>
       <p>{selectedMac && selectedMac.statistics.maxDetectedRssi.apMacAddress}</p>
-      <p className="BlueHeader">SSID:</p>
-      <p>{selectedMac && selectedMac.ssId}</p>
+      {selectedMac && selectedMac.ssId
+      && (
+      <div>
+        <p className="BlueHeader">SSID:</p>
+        <p>{selectedMac && selectedMac.ssId}</p>
+      </div>
+      )
+      }
     </div>)
 }
 
