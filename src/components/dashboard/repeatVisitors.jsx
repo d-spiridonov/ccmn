@@ -100,7 +100,7 @@ class RepearVisitors extends Component {
       <Content>
         <h2>Repeat Visitors</h2>
         <div className="chart-box">
-          <Bar data={data} width={100} height={40} />
+          <Line data={data} width={100} height={40} />
         </div>
       </Content>
     )
